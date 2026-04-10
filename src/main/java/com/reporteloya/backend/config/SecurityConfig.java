@@ -109,7 +109,7 @@ public class SecurityConfig {
                 CorsConfiguration configuration = new CorsConfiguration();
 
                 // 🔥 ORIGEN EXACTO (NO "*")
-                configuration.setAllowedOrigins(List.of("https://frontend-eight-beta-69.vercel.app/"));
+                configuration.setAllowedOrigins(List.of("https://frontend-eight-beta-69.vercel.app"));
 
                 configuration.setAllowedMethods(List.of(
                                 "GET", "POST", "PUT", "DELETE", "OPTIONS"));
