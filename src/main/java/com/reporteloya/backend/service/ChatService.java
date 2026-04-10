@@ -11,7 +11,7 @@ import java.util.Map;
 public class ChatService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String aiChatUrl = "http://localhost:8000/chat";
+    private final String aiChatUrl = "https://backend-ia-8in0.onrender.com/chat";
 
     public Map<String, Object> sendMessage(Long userId, Integer conversationId, String message) {
 

@@ -9,7 +9,7 @@ import java.util.Map;
 public class ChatAISyncService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String syncUserUrl = "http://localhost:8000/sync-user";
+    private final String syncUserUrl = "https://backend-ia-8in0.onrender.com/sync-user";
 
     public boolean syncUser(Long userId, String email, String nombreCompleto, 
                            String role, String tipoDocumento, String numeroDocumento) {

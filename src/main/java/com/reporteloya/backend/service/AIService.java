@@ -11,7 +11,7 @@ import java.util.Map;
 public class AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String aiUrl = "http://localhost:8000/ai/start";
+    private final String aiUrl = "https://backend-ia-8in0.onrender.com/ai/start";
 
     public Map<String, Object> startConversation(Long userId, String name, String role) {
         AIRequest request = new AIRequest(userId, name, role);
