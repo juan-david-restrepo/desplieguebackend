@@ -108,13 +108,18 @@ public class SecurityConfig {
 
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // 🔥 ORIGEN EXACTO (NO "*")
-                configuration.setAllowedOrigins(List.of("https://frontend-eight-beta-69.vercel.app"));
+                // 🔥 MULTIPLE ORIGINS (con y sin trailing slash)
+                configuration.setAllowedOrigins(List.of(
+                        "https://frontend-eight-beta-69.vercel.app",
+                        "https://frontend-eight-beta-69.vercel.app/"
+                ));
 
                 configuration.setAllowedMethods(List.of(
                                 "GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
                 configuration.setAllowedHeaders(List.of("*"));
+
+                configuration.setExposedHeaders(List.of("Set-Cookie"));
 
                 configuration.setAllowCredentials(true); // necesario para cookies
 
