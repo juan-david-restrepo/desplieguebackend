@@ -1,35 +1,29 @@
 package com.reporteloya.backend.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.UUID;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.Transformation;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.PostConstruct;
-
+import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class FileStorageService {
 
-    @Value("${app.upload.dir}")
-    private String uploadDir;
-
-    @Value("${app.base-url}")
-    private String baseUrl;
-
-    @PostConstruct
-    public void init() {
-        System.out.println("UPLOAD DIR ES: " + uploadDir);
-    }
+    private final Cloudinary cloudinary;
 
     private static final List<String> TIPOS_PERMITIDOS = List.of(
             "image/jpeg",
             "image/png",
             "image/webp");
+
+    public FileStorageService(Cloudinary cloudinary) {
+        this.cloudinary = cloudinary;
+    }
 
     public String guardarArchivo(MultipartFile file, Long reporteId) throws IOException {
 
@@ -41,26 +35,96 @@ public class FileStorageService {
             throw new RuntimeException("Tipo de archivo no permitido");
         }
 
-        // 🔥 Construcción segura de ruta
-        File carpetaReporte = new File(uploadDir, String.valueOf(reporteId));
+        String publicId = "reporte_" + reporteId + "_" + UUID.randomUUID().toString();
 
-        if (!carpetaReporte.exists()) {
-            boolean creada = carpetaReporte.mkdirs();
-            if (!creada) {
-                throw new IOException("No se pudo crear la carpeta del reporte");
-            }
-        }
+        Map uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "public_id", publicId,
+                        "folder", "reporteloya",
+                        "resource_type", "image"
+                )
+        );
 
-        String original = Objects.requireNonNull(file.getOriginalFilename());
-        String extension = original.substring(original.lastIndexOf("."));
+        String secureUrl = (String) uploadResult.get("secure_url");
 
-        String nombreSeguro = UUID.randomUUID() + extension;
-
-        File destino = new File(carpetaReporte, nombreSeguro);
-
-        file.transferTo(destino);
-
-        return baseUrl + "/uploads/" + reporteId + "/" + nombreSeguro;
+        return secureUrl;
     }
 
+    public String guardarFotoPerfil(MultipartFile file, Long usuarioId) throws IOException {
+
+        if (file.isEmpty()) {
+            throw new RuntimeException("Archivo vacío");
+        }
+
+        if (!TIPOS_PERMITIDOS.contains(file.getContentType())) {
+            throw new RuntimeException("Tipo de archivo no permitido");
+        }
+
+        String publicId = "perfil_" + usuarioId + "_" + UUID.randomUUID().toString();
+
+        Map uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "public_id", publicId,
+                        "folder", "reporteloya/perfiles",
+                        "resource_type", "image",
+                        "transformation", new Transformation().width(200).height(200).crop("fill").gravity("face")
+                )
+        );
+
+        String secureUrl = (String) uploadResult.get("secure_url");
+
+        return secureUrl;
+    }
+
+    public String guardarEvidencia(MultipartFile file, Long reporteId, int indice) throws IOException {
+
+        if (file.isEmpty()) {
+            throw new RuntimeException("Archivo vacío");
+        }
+
+        if (!TIPOS_PERMITIDOS.contains(file.getContentType())) {
+            throw new RuntimeException("Tipo de archivo no permitido");
+        }
+
+        String publicId = "evidencia_" + reporteId + "_" + indice + "_" + UUID.randomUUID().toString();
+
+        Map uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap(
+                        "public_id", publicId,
+                        "folder", "reporteloya/evidencias",
+                        "resource_type", "image"
+                )
+        );
+
+        String secureUrl = (String) uploadResult.get("secure_url");
+
+        return secureUrl;
+    }
+
+    public String guardarFotoPerfil(byte[] imageBytes, String contentType, Long usuarioId) throws IOException {
+        if (imageBytes == null || imageBytes.length == 0) {
+            throw new RuntimeException("Archivo vacío");
+        }
+
+        if (!TIPOS_PERMITIDOS.contains(contentType)) {
+            throw new RuntimeException("Tipo de archivo no permitido");
+        }
+
+        String publicId = "perfil_" + usuarioId + "_" + UUID.randomUUID().toString();
+
+        Map uploadResult = cloudinary.uploader().upload(
+                imageBytes,
+                ObjectUtils.asMap(
+                        "public_id", publicId,
+                        "folder", "reporteloya/perfiles",
+                        "resource_type", "image",
+                        "transformation", new Transformation().width(200).height(200).crop("fill").gravity("face")
+                )
+        );
+
+        return (String) uploadResult.get("secure_url");
+    }
 }
