@@ -140,8 +140,8 @@
         <!-- Cloudinary SDK -->
         <dependency>
             <groupId>com.cloudinary</groupId>
-            <artifactId>cloudinary-http-engine</artifactId>
-            <version>0.35.0</version>
+            <artifactId>cloudinary-http5</artifactId>
+            <version>2.3.1</version>
         </dependency>
 
     </dependencies>
