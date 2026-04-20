@@ -31,4 +31,7 @@ public class ReporteSocketDTO {
     private String fechaFinalizado;
     private String fechaRechazado;
     private String resumenOperativo;
+    
+    // ✅ NUEVO: comparendo
+    private Boolean huboComparendo;
 }

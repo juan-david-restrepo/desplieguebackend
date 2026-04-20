@@ -15,6 +15,8 @@ public class EstadisticasCompletasDTO {
     private int reportesHoy;
     private int reportesResueltos;
     private int reportesRechazados;
+    private int comparendosSi;
+    private int comparendosNo;
     private String fechaInicio;
     private String fechaFin;
     

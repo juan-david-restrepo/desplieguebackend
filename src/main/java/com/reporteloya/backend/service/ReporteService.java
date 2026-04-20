@@ -232,6 +232,7 @@ public class ReporteService {
         dto.setPrioridad(reporte.getPrioridad() != null ? reporte.getPrioridad().name() : null);
         dto.setAcompanado(reporte.getAcompanado() != null ? reporte.getAcompanado() : false);
         dto.setResumenOperativo(reporte.getResumenOperativo());
+        dto.setHuboComparendo(reporte.getHuboComparendo());
 
         dto.setHoraIncidente(
             reporte.getHoraIncidente() != null
@@ -450,7 +451,7 @@ public class ReporteService {
     // ================================
     // FINALIZAR REPORTE
     // ================================
-    public Reporte finalizarReporte(Long reporteId, String emailAgente, String resumen, Long userId) {
+    public Reporte finalizarReporte(Long reporteId, String emailAgente, String resumen, Long userId, Boolean huboComparendo) {
 
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -463,10 +464,12 @@ public class ReporteService {
         System.out.println("Reporte ID: " + reporteId);
         System.out.println("Email: " + emailAgente);
         System.out.println("User ID: " + userId);
+        System.out.println("Hubo Comparendo: " + huboComparendo);
         System.out.println("================================");
 
         reporte.setEstado("FINALIZADO");
         reporte.setResumenOperativo(resumen);
+        reporte.setHuboComparendo(huboComparendo);
         reporte.setFechaFinalizado(LocalDateTime.now());
 
         Reporte finalizado = reporteRepository.save(reporte);
@@ -651,11 +654,20 @@ public class ReporteService {
         // Contar rechazados en el rango de fechas
         int reportesRechazados = reporteRepository.countRechazadosEntre(inicio, fin);
 
+        // Contar comparendos (lógica consistente)
+        // comparendosSi = los que tienen huboComparendo = true (IS NOT NULL)
+        // comparendosNo = totalFinalizados - comparendosSi
+        int totalFinalizados = reporteRepository.countTotalFinalizadosEntre(inicio, fin);
+        int comparendosSi = reporteRepository.countComparendosSiEntre(inicio, fin);
+        int comparendosNo = totalFinalizados - comparendosSi;
+
         return new EstadisticasDashboardDTO(
             totalPendientes,
             reportesHoy,
             reportesResueltos,
             reportesRechazados,
+            comparendosSi,
+            comparendosNo,
             fechaInicio != null ? fechaInicio : LocalDate.now().toString(),
             fechaFin != null ? fechaFin : LocalDate.now().toString()
         );
@@ -783,6 +795,22 @@ public class ReporteService {
         int reportesRechazados = reporteRepository.countByAgentePlacaAndEstadoAndFechaRechazadoBetween(
             placa, "RECHAZADO", fechaInicioDateTime, fechaFinDateTime);
 
+        // Contar comparendos por agente
+        // Ahora: comparendosSi = los que tienen huboComparendo = true
+        // comparendosNo = totalFinalizados - comparendosSi (los que tienen huboComparendo = false o null)
+        int totalFinalizadosAgente = reporteRepository.countTotalFinalizadosPorAgente(placa, fechaInicioDateTime, fechaFinDateTime);
+        int comparendosSi = reporteRepository.countComparendosSiPorAgente(placa, fechaInicioDateTime, fechaFinDateTime);
+        int comparendosNo = totalFinalizadosAgente - comparendosSi;
+
+        // Log para debug
+        System.out.println("=== ESTADISTICAS COMPLETAS ===");
+        System.out.println("placa: " + placa);
+        System.out.println("fechaInicio: " + fechaInicioDateTime);
+        System.out.println("fechaFin: " + fechaFinDateTime);
+        System.out.println("reportesResueltos: " + reportesResueltos);
+        System.out.println("comparendosSi: " + comparendosSi);
+        System.out.println("comparendosNo (calculado): " + comparendosNo);
+
         // Obtener estadísticas de gráficas filtradas por rango de fechas
         List<EstadisticaGraficaDTO.StatItem> statsSemana = obtenerStatsDesdeBDPorFechas(
             placa, "SEMANA", 
@@ -802,6 +830,8 @@ public class ReporteService {
             reportesEnRango,
             reportesResueltos,
             reportesRechazados,
+            comparendosSi,
+            comparendosNo,
             fechaIni.toString(),
             fechaF.toString(),
             statsSemana,

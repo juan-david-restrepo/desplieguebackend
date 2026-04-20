@@ -95,6 +95,8 @@ public class Reporte {
     @Column(length = 1000)
     private String resumenOperativo;
 
+    private Boolean huboComparendo;
+
     private LocalDateTime fechaAceptado;
 
     private LocalDateTime fechaFinalizado;

@@ -111,7 +111,9 @@ public class SecurityConfig {
                 // 🔥 MULTIPLE ORIGINS (con y sin trailing slash)
                 configuration.setAllowedOrigins(List.of(
                         "https://frontend-eight-beta-69.vercel.app",
-                        "https://frontend-eight-beta-69.vercel.app/"
+                        "https://frontend-eight-beta-69.vercel.app/",
+                        "http://localhost:4200",
+                        "http://localhost:4200/"
                 ));
 
                 configuration.setAllowedMethods(List.of(

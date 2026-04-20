@@ -20,6 +20,12 @@ public class EstadisticasDashboardDTO {
     // Total de reportes rechazados en el rango de fechas
     private int reportesRechazados;
     
+    // Comparendos con comparendo SÍ
+    private int comparendosSi;
+    
+    // Comparendos con comparendo NO
+    private int comparendosNo;
+    
     // Rango de fechas usado para las estadísticas
     private String fechaInicio;
     private String fechaFin;

@@ -161,10 +161,13 @@ public class ReporteController {
     @PostMapping("/finalizar/{id}")
     public ResponseEntity<?> finalizarReporte(
             @PathVariable Long id,
-            @RequestBody Map<String, String> body,
+            @RequestBody Map<String, Object> body,
             Authentication authentication) {
 
-        String resumen = body.get("resumen");
+        String resumen = (String) body.get("resumen");
+        Boolean huboComparendo = body.get("huboComparendo") != null 
+            ? (Boolean) body.get("huboComparendo") 
+            : null;
 
         try {
             String email = authentication.getName();
@@ -172,7 +175,7 @@ public class ReporteController {
             Long userId = usuario.getId();
             
             Reporte actualizado = reporteService.finalizarReporte(
-                    id, email, resumen, userId);
+                    id, email, resumen, userId, huboComparendo);
             return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

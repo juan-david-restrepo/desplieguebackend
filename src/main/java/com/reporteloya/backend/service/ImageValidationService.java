@@ -3,6 +3,8 @@ package com.reporteloya.backend.service;
 import com.google.cloud.vision.v1.*;
 import com.google.protobuf.ByteString;
 import com.reporteloya.backend.dto.ImageValidationResult;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +20,9 @@ public class ImageValidationService {
 
     private static final double MIN_SCORE = 0.5;
 
+    @Value("${google.credentials.path:google-credentials.json}")
+    private String credentialsPath;
+
     public ImageValidationResult validarImagen(MultipartFile file, String tipoInfraccion) {
         ImageValidationResult result = new ImageValidationResult();
         result.setTipoInfraccion(tipoInfraccion);
@@ -25,19 +30,18 @@ public class ImageValidationService {
         try {
             System.out.println("=== INICIANDO VALIDACIÓN DETALLADA ===");
             System.out.println("Tipo de infracción: " + tipoInfraccion);
+            System.out.println("Credentials path: " + credentialsPath);
 
-            String credentialsJson = System.getenv("GOOGLE_CREDENTIALS");
-            InputStream credentialsStream;
+            InputStream credentialsStream = getClass()
+                    .getClassLoader()
+                    .getResourceAsStream(credentialsPath);
             
-            if (credentialsJson != null && !credentialsJson.isEmpty()) {
-                credentialsStream = new ByteArrayInputStream(credentialsJson.getBytes());
-                System.out.println("Cargando credenciales desde variable de entorno");
-            } else {
+            if (credentialsStream == null) {
                 credentialsStream = getClass()
                         .getClassLoader()
                         .getResourceAsStream("google-credentials.json");
-                System.out.println("Cargando credenciales desde archivo");
             }
+            System.out.println("Cargando credenciales desde archivo");
 
             if (credentialsStream == null) {
                 System.out.println("ERROR: No se encontró el archivo de credenciales");
@@ -46,10 +50,11 @@ public class ImageValidationService {
                 return result;
             }
 
+            final InputStream credsStream = credentialsStream;
             ImageAnnotatorSettings settings = ImageAnnotatorSettings.newBuilder()
                     .setCredentialsProvider(() ->
                             com.google.auth.oauth2.ServiceAccountCredentials
-                                    .fromStream(credentialsStream))
+                                    .fromStream(credsStream))
                     .build();
 
             try (ImageAnnotatorClient vision = ImageAnnotatorClient.create(settings)) {

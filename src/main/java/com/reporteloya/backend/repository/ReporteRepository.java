@@ -94,6 +94,37 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
         @Param("inicio") LocalDateTime inicio, 
         @Param("fin") LocalDateTime fin);
 
+    // Contar comparendos SÍ en un rango de fechas (para dashboard agente)
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.estado = 'FINALIZADO' AND r.huboComparendo IS NOT NULL AND r.fechaFinalizado BETWEEN :inicio AND :fin")
+    int countComparendosSiEntre(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
+    // Contar comparendos NO en un rango de fechas (para dashboard agente)
+    // Contar todos los finalizados - los que tienen comparendo
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.estado = 'FINALIZADO' AND r.fechaFinalizado BETWEEN :inicio AND :fin")
+    int countTotalFinalizadosEntre(@Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
+    // Contar comparendos SÍ por agente en un rango de fechas
+    @Query("SELECT COUNT(r) FROM Reporte r " +
+           "JOIN r.agente a " +
+           "LEFT JOIN r.agenteCompanero ac " +
+           "WHERE (a.placa = :placa OR ac.placa = :placa) " +
+           "AND r.estado = 'FINALIZADO' AND r.huboComparendo IS NOT NULL AND r.fechaFinalizado BETWEEN :inicio AND :fin")
+    int countComparendosSiPorAgente(
+        @Param("placa") String placa,
+        @Param("inicio") LocalDateTime inicio, 
+        @Param("fin") LocalDateTime fin);
+
+    // Contar todos finalizados por agente para calcular los sin comparendo
+    @Query("SELECT COUNT(r) FROM Reporte r " +
+           "JOIN r.agente a " +
+           "LEFT JOIN r.agenteCompanero ac " +
+           "WHERE (a.placa = :placa OR ac.placa = :placa) " +
+           "AND r.estado = 'FINALIZADO' AND r.fechaFinalizado BETWEEN :inicio AND :fin")
+    int countTotalFinalizadosPorAgente(
+        @Param("placa") String placa,
+        @Param("inicio") LocalDateTime inicio, 
+        @Param("fin") LocalDateTime fin);
+
 
     @Query("SELECT COUNT(r) FROM Reporte r WHERE r.usuario.id = :usuarioId")
     int countByUsuarioId(@Param("usuarioId") Long usuarioId);

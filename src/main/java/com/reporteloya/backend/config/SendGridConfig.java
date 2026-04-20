@@ -1,25 +1,30 @@
 package com.reporteloya.backend.config;
 
 import com.sendgrid.SendGrid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SendGridConfig {
 
+    @Value("${spring.sendgrid.api-key}")
+    private String sendgridApiKey;
+
+    @Value("${spring.sendgrid.from-email:reporteloy@gmail.com}")
+    private String sendgridFromEmail;
+
     @Bean
     public SendGrid sendGrid() {
-        String apiKey = System.getenv("SENDGRID_API_KEY");
-        if (apiKey == null || apiKey.isBlank()) {
+        if (sendgridApiKey == null || sendgridApiKey.isBlank()) {
             throw new IllegalStateException("SENDGRID_API_KEY no configurada en variables de entorno");
         }
-        return new SendGrid(apiKey);
+        return new SendGrid(sendgridApiKey);
     }
 
     @Bean
     public String sendgridFromEmail() {
-        String email = System.getenv("SENDGRID_FROM_EMAIL");
-        return email != null && !email.isBlank() ? email : "reporteloy@gmail.com";
+        return sendgridFromEmail;
     }
 
     @Bean
