@@ -41,7 +41,7 @@ public class AuthService {
     @Value("${app.verification.url:https://frontend-eight-beta-69.vercel.app/verificar-correo}")
     private String verificationUrl;
 
-    private static final int TOKEN_EXPIRATION_MINUTES = 15;
+    private static final int TOKEN_EXPIRATION_MINUTES = 60;
 
     @Transactional
     public Map<String, Object> register(RegisterRequest request) {
@@ -70,23 +70,20 @@ public class AuthService {
         String token = UUID.randomUUID().toString();
         LocalDateTime expirationDate = LocalDateTime.now().plusMinutes(TOKEN_EXPIRATION_MINUTES);
 
-        try {
-            EmailVerificationToken verificationToken = new EmailVerificationToken(
-                    request.getEmail(),
-                    token,
-                    expirationDate,
-                    nuevoUsuario.getId()
-            );
-            emailVerificationRepository.save(verificationToken);
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error al guardar token de verificación", e);
-        }
+        EmailVerificationToken verificationToken = new EmailVerificationToken(
+                request.getEmail(),
+                token,
+                expirationDate,
+                nuevoUsuario.getId()
+        );
+        emailVerificationRepository.save(verificationToken);
 
         try {
             String enlaceVerificacion = verificationUrl + "?token=" + token;
             emailService.enviarCorreoVerificacion(request.getEmail(), enlaceVerificacion);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error al enviar correo de verificación, pero el usuario fue registrado correctamente", e);
+            logger.log(Level.WARNING, "Error al enviar correo de verificación", e);
+            throw new IllegalArgumentException("No pudimos enviarte el correo de verificación. Verifica que la dirección sea correcta e intenta registrarte nuevamente.");
         }
 
         return Map.of(

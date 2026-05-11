@@ -5,6 +5,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -13,11 +14,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class EmailService {
 
-    private final SendGrid sendGrid; // Bean de SendGrid que configuraremos
+    private final SendGrid sendGrid;
+
+    @Value("${spring.sendgrid.from-email:reporteloy@gmail.com}")
+    private String fromEmail;
 
     public void enviarCorreoRecuperacion(String destinatario, String enlace) {
-        // Remitente
-        Email from = new Email("reporteloy@gmail.com", "RepórteloYa"); // si verificaste gmail
+        Email from = new Email(fromEmail, "RepórteloYa");
 
         // Asunto
         String subject = "Recupera tu contraseña - RepórteloYa";
@@ -43,7 +46,7 @@ public class EmailService {
                                Restablecer contraseña
                             </a>
                         </div>
-                        <p style="font-size:14px; color:#555;">Tenga en cuenta que este enlace expirará en 15 minutos por motivos de seguridad.</p>
+                        <p style="font-size:14px; color:#555;">Tenga en cuenta que este enlace expirará en 60 minutos por motivos de seguridad.</p>
                         <hr style="margin:25px 0;">
                         <p style="font-size:12px; color:#888;">Si usted no solicitó este cambio, puede ignorar este mensaje y su contraseña permanecerá sin modificaciones.</p>
                         <br>
@@ -84,7 +87,7 @@ public class EmailService {
     }
 
     public void enviarCorreoVerificacion(String destinatario, String enlace) {
-        Email from = new Email("reporteloy@gmail.com", "RepórteloYa");
+        Email from = new Email(fromEmail, "RepórteloYa");
 
         String subject = "Verifica tu correo electrónico - RepórteloYa";
 
@@ -105,7 +108,7 @@ public class EmailService {
                                Verificar correo electrónico
                             </a>
                         </div>
-                        <p style="font-size:14px; color:#555;">Este enlace expirará en 15 minutos por motivos de seguridad.</p>
+                        <p style="font-size:14px; color:#555;">Este enlace expirará en 60 minutos por motivos de seguridad.</p>
                         <hr style="margin:25px 0;">
                         <p style="font-size:12px; color:#888;">Si no creaste una cuenta en Repórtelo Ya, puedes ignorar este mensaje.</p>
                         <br>

@@ -1,6 +1,7 @@
 package com.reporteloya.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,8 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.transaction.annotation.Transactional; // IMPORTANTE PARA EL BORRADO
-import java.util.List;          //  ESTE IMPORT FALTABA
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.reporteloya.backend.entity.Tarea;
@@ -18,6 +19,7 @@ import com.reporteloya.backend.entity.Agentes;
 import com.reporteloya.backend.entity.Reporte;
 import com.reporteloya.backend.entity.Notification;
 import com.reporteloya.backend.dto.AdminAgenteDTO;
+import com.reporteloya.backend.dto.CrearAgenteRequest;
 import com.reporteloya.backend.dto.ReporteSocketDTO;
 import com.reporteloya.backend.dto.TareaSocketDTO;
 import com.reporteloya.backend.service.AgenteService;
@@ -51,6 +53,22 @@ public class AdminController {
 
     @Autowired
     private ReporteService reporteService;
+
+    // =========================
+    // CREAR AGENTE (solo ADMIN)
+    // =========================
+    @PostMapping("/agentes/crear")
+    public ResponseEntity<?> crearAgente(@RequestBody CrearAgenteRequest request) {
+        try {
+            Agentes agente = agenteService.crearAgente(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(toAdminDTO(agente));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error al crear el agente: " + e.getMessage());
+        }
+    }
 
     // =========================
     // LISTAR TODOS LOS AGENTES

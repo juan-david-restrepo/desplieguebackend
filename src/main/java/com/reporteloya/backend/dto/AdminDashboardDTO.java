@@ -10,6 +10,7 @@ public class AdminDashboardDTO {
     private int enProceso;
     private int finalizados;
     private int rechazados;
+    private int expirados;
     private int reportesHoy;
     private List<EstadisticaGraficaDTO.StatItem> estadisticasTipo;
     private List<EstadisticaGraficaDTO.StatItem> estadisticasMes;

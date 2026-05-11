@@ -29,4 +29,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.usuario.id = :usuarioId AND n.id NOT IN (SELECT n2.id FROM Notification n2 WHERE n2.usuario.id = :usuarioId ORDER BY n2.fechaCreacion DESC LIMIT 50)")
     void eliminarExtrasParaUsuario(@Param("usuarioId") Long usuarioId);
+
+    @Modifying
+    @Query("UPDATE Notification n SET n.leida = true WHERE n.agente.id = :agenteId AND n.leida = false")
+    int marcarTodasLeidasPorAgenteId(@Param("agenteId") Long agenteId);
 }

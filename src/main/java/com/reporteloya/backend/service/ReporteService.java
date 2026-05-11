@@ -281,6 +281,12 @@ public class ReporteService {
             dto.setUrlFoto(reporte.getEvidencias().get(0).getArchivo());
         }
 
+        dto.setCreatedAt(
+            reporte.getCreatedAt() != null
+                ? reporte.getCreatedAt().toLocalDate().toString()
+                : null
+        );
+
         return dto;
     }
 
@@ -853,6 +859,7 @@ public class ReporteService {
         int enProceso = reporteRepository.countByEstado("EN_PROCESO");
         int finalizados = reporteRepository.countByEstado("FINALIZADO");
         int rechazados = reporteRepository.countByEstado("RECHAZADO");
+        int expirados = reporteRepository.countByEstado("EXPIRADO");
         int reportesHoy = reporteRepository.countReportesCreadosEntre(inicioDia, finDia);
 
         List<EstadisticaGraficaDTO.StatItem> statsSemana = obtenerStatsGlobales("SEMANA", 
@@ -866,6 +873,7 @@ public class ReporteService {
         dto.setEnProceso(enProceso);
         dto.setFinalizados(finalizados);
         dto.setRechazados(rechazados);
+        dto.setExpirados(expirados);
         dto.setReportesHoy(reportesHoy);
         dto.setEstadisticasSemana(statsSemana);
         dto.setEstadisticasMes(statsMes);

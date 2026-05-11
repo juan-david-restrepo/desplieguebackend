@@ -58,6 +58,7 @@ public class SecurityConfig {
 
                                                 .requestMatchers("/api/auth/me").authenticated()
 
+                                                .requestMatchers("/admin/agentes/crear").hasRole("ADMIN")
                                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "AGENTE")
                                                 .requestMatchers("/agente/**").hasAnyRole("AGENTE", "ADMIN")
 

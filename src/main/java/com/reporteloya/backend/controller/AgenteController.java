@@ -11,7 +11,6 @@ import com.reporteloya.backend.repository.TareaRepository;
 import com.reporteloya.backend.repository.NotificationRepository;
 import com.reporteloya.backend.service.AgenteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +19,12 @@ import org.springframework.security.core.Authentication;
 import java.util.Map;
 import java.util.List;
 import java.util.Base64;
-import java.io.File;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/agente")
 @CrossOrigin(origins = {"https://frontend-eight-beta-69.vercel.app"})
 public class AgenteController {
-
-    @Value("${app.upload.dir}")
-    private String uploadDir;
-
-    @Value("${app.base-url}")
-    private String baseUrl;
 
     @Autowired
     private TareaRepository tareaRepository;
@@ -260,17 +252,10 @@ public class AgenteController {
             byte[] imageBytes = Base64.getDecoder().decode(base64Data);
 
             String fileName = "perfil_" + agente.getId() + "_" + UUID.randomUUID() + extension;
-            
-            String uploadPath = uploadDir + "/perfiles/";
-            File dir = new File(uploadPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
 
-            File file = new File(uploadPath + fileName);
-            java.nio.file.Files.write(file.toPath(), imageBytes);
+            String fotoUrl = agenteService.subirFotoACloudinary(imageBytes, fileName);
 
-            agente.setFoto(baseUrl + "/uploads/perfiles/" + fileName);
+            agente.setFoto(fotoUrl);
 
             agenteService.guardar(agente);
 
@@ -333,6 +318,18 @@ public class AgenteController {
                         return ResponseEntity.ok().build();
                     })
                     .orElse(ResponseEntity.notFound().build());
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/notificaciones/leer-todas")
+    @Transactional
+    public ResponseEntity<?> marcarTodasNotificacionesLeidas(Authentication authentication) {
+        String email = authentication.getName();
+        return agenteService.buscarPorEmail(email)
+            .map(agente -> {
+                notificationRepository.marcarTodasLeidasPorAgenteId(agente.getId());
+                return ResponseEntity.ok().build();
             })
             .orElse(ResponseEntity.notFound().build());
     }

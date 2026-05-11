@@ -34,4 +34,7 @@ public class ReporteSocketDTO {
     
     // ✅ NUEVO: comparendo
     private Boolean huboComparendo;
+
+    // Fecha de creación del reporte (yyyy-MM-dd) para filtros de mapa
+    private String createdAt;
 }
