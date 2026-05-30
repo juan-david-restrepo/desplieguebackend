@@ -48,13 +48,13 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/resend-verification", "/api/auth/verify-email").permitAll()
                                                 .requestMatchers("/api/password/**").permitAll()
                                                 
-                                                // Reportes - solo crear requiere autenticación
+                                                // Reportes
                                                 .requestMatchers("/api/reportes/crear").authenticated()
-                                                .requestMatchers("/api/reportes/mapa").permitAll()
-                                                .requestMatchers("/api/reportes/pendientes").permitAll()
-                                                .requestMatchers("/api/reportes/todos").permitAll()
-                                                .requestMatchers("/api/reportes/estadisticas-admin").permitAll()
-                                                .requestMatchers("/api/reportes").permitAll()
+                                                .requestMatchers("/api/reportes/mapa").authenticated()
+                                                .requestMatchers("/api/reportes/pendientes").authenticated()
+                                                .requestMatchers("/api/reportes/todos").authenticated()
+                                                .requestMatchers("/api/reportes/estadisticas-admin").hasRole("ADMIN")
+                                                .requestMatchers("/api/reportes").authenticated()
 
                                                 .requestMatchers("/api/auth/me").authenticated()
 
@@ -71,8 +71,8 @@ public class SecurityConfig {
                                                 // Soporte - ciudadano puede crear y ver sus tickets
                                                 .requestMatchers("/api/soporte/crear").hasRole("CIUDADANO")
                                                 .requestMatchers("/api/soporte/mis-tickets/**").hasRole("CIUDADANO")
-                                                // Soporte - admin y agente pueden gestionar tickets
-                                                .requestMatchers("/api/soporte/admin/**").hasAnyRole("ADMIN", "AGENTE")
+                                                // Soporte - solo admin gestiona tickets
+                                                .requestMatchers("/api/soporte/admin/**").hasRole("ADMIN")
 
                                                 .requestMatchers("/ws/**").permitAll()
                                                 .requestMatchers("/error").permitAll()
