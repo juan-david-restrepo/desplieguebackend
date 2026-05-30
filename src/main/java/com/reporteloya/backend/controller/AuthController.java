@@ -13,7 +13,11 @@ import jakarta.servlet.http.Cookie;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.reporteloya.backend.config.RateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -29,13 +33,21 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthService authService;
     private final JwtService jwtService;
     private final ChatAISyncService chatAISyncService;
+    private final RateLimitService rateLimitService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request,
-                                      HttpServletResponse response) {
+                                      HttpServletResponse response,
+                                      HttpServletRequest httpRequest) {
+        String ip = httpRequest.getRemoteAddr();
+        if (!rateLimitService.isAllowed("register:" + ip)) {
+            return ResponseEntity.status(429).body("Demasiados intentos. Espera unos minutos.");
+        }
         try {
             Map<String, Object> result = authService.register(request);
 
@@ -61,9 +73,9 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error inesperado en registro", e);
             return ResponseEntity.internalServerError()
-                    .body("Error interno al registrar el usuario: " + e.getMessage());
+                    .body("Error interno al registrar el usuario. Intenta más tarde.");
         }
     }
 
@@ -120,7 +132,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request,
-                                   HttpServletResponse response) {
+                                   HttpServletResponse response,
+                                   HttpServletRequest httpRequest) {
+        String ip = httpRequest.getRemoteAddr();
+        if (!rateLimitService.isAllowed("login:" + ip)) {
+            return ResponseEntity.status(429).body("Demasiados intentos de inicio de sesión. Espera unos minutos.");
+        }
         try {
             AuthResult result = authService.login(request);
             Usuario usuario = result.usuario();

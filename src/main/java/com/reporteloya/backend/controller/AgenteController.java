@@ -10,6 +10,8 @@ import com.reporteloya.backend.entity.Notification;
 import com.reporteloya.backend.repository.TareaRepository;
 import com.reporteloya.backend.repository.NotificationRepository;
 import com.reporteloya.backend.service.AgenteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -25,6 +27,8 @@ import java.util.UUID;
 @RequestMapping("/agente")
 @CrossOrigin(origins = {"https://frontend-eight-beta-69.vercel.app"})
 public class AgenteController {
+
+    private static final Logger log = LoggerFactory.getLogger(AgenteController.class);
 
     @Autowired
     private TareaRepository tareaRepository;
@@ -103,19 +107,13 @@ public class AgenteController {
 
         String nuevoEstado = body.get("estado");
         String resumenOperativo = body.get("resumenOperativo");
-        
-        System.out.println("=== ACTUALIZAR TAREA ===");
-        System.out.println("ID: " + id);
-        System.out.println("Estado: " + nuevoEstado);
-        System.out.println("Resumen Operativo: " + resumenOperativo);
-        System.out.println("========================");
+        log.info("Actualizando tarea {} → estado={}", id, nuevoEstado);
 
         return tareaRepository.findById(id).map(tarea -> {
 
             tarea.setEstado(nuevoEstado);
-            
+
             if (resumenOperativo != null && !resumenOperativo.isEmpty()) {
-                System.out.println("Guardando resumen: " + resumenOperativo);
                 tarea.setResumenOperativo(resumenOperativo);
             }
 

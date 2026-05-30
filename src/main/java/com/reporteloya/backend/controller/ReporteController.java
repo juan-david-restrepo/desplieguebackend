@@ -18,10 +18,14 @@ import com.reporteloya.backend.dto.AdminDashboardDTO;
 import com.reporteloya.backend.entity.Reporte;
 import com.reporteloya.backend.entity.Usuario;
 import com.reporteloya.backend.service.ReporteService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/reportes")
 public class ReporteController {
+
+    private static final Logger log = LoggerFactory.getLogger(ReporteController.class);
 
     private final ReporteService reporteService;
 
@@ -49,26 +53,13 @@ public class ReporteController {
             return ResponseEntity.status(403).body(Map.of("error", "No autenticado"));
         }
 
-        try {
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-            
-            System.out.println("=== CREAR REPORTE ===");
-            System.out.println("Usuario ID: " + usuario.getId());
-            System.out.println("Usuario Email: " + usuario.getEmail());
-            System.out.println("Usuario Nombre: " + usuario.getNombreCompleto());
-            System.out.println("====================");
-            
-            Reporte reporte = reporteService.crearReporte(
-                    descripcion, direccion, latitud, longitud,
-                    placa, fechaIncidente, horaIncidente,
-                    tipoInfraccion, archivos, usuario);
-
-            return ResponseEntity.ok(reporte);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        log.info("Creando reporte para usuario {}", usuario.getId());
+        Reporte reporte = reporteService.crearReporte(
+                descripcion, direccion, latitud, longitud,
+                placa, fechaIncidente, horaIncidente,
+                tipoInfraccion, archivos, usuario);
+        return ResponseEntity.ok(reporte);
     }
 
     // ================================
@@ -79,24 +70,11 @@ public class ReporteController {
             @PathVariable Long id,
             Authentication authentication) {
 
-        try {
-            String email = authentication.getName();
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
-            
-            System.out.println("=== ACEPTAR REPORTE (SOLO) ===");
-            System.out.println("Reporte ID: " + id);
-            System.out.println("Email del token: " + email);
-            System.out.println("User ID: " + userId);
-            System.out.println("User Nombre: " + usuario.getNombreCompleto());
-            System.out.println("===============================");
-            
-            Reporte actualizado = reporteService.tomarReporte(id, email, userId);
-            return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        String email = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        log.info("Agente {} aceptando reporte {}", usuario.getId(), id);
+        Reporte actualizado = reporteService.tomarReporte(id, email, usuario.getId());
+        return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
     }
 
     // ================================
@@ -114,25 +92,11 @@ public class ReporteController {
             return ResponseEntity.badRequest().body("Debes indicar la placa del compañero");
         }
 
-        try {
-            String email = authentication.getName();
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
-            
-            System.out.println("=== ACEPTAR REPORTE (ACOMPAÑADO) ===");
-            System.out.println("Reporte ID: " + id);
-            System.out.println("Email: " + email);
-            System.out.println("User ID: " + userId);
-            System.out.println("Placa Compañero: " + placaCompanero);
-            System.out.println("==================================");
-            
-            Reporte actualizado = reporteService.tomarReporteConCompanero(
-                    id, email, placaCompanero, userId);
-            return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        String email = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        log.info("Agente {} aceptando reporte {} con compañero {}", usuario.getId(), id, placaCompanero);
+        Reporte actualizado = reporteService.tomarReporteConCompanero(id, email, placaCompanero, usuario.getId());
+        return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
     }
 
     // ================================
@@ -144,17 +108,11 @@ public class ReporteController {
             @RequestBody(required = false) java.util.Map<String, String> body,
             Authentication authentication) {
 
-        try {
-            String email = authentication.getName();
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
-            String motivo = body != null ? body.get("motivo") : null;
-
-            Reporte actualizado = reporteService.rechazarReporte(id, email, userId, motivo);
-            return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        String email = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        String motivo = body != null ? body.get("motivo") : null;
+        Reporte actualizado = reporteService.rechazarReporte(id, email, usuario.getId(), motivo);
+        return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
     }
 
     // ================================
@@ -171,17 +129,10 @@ public class ReporteController {
             ? (Boolean) body.get("huboComparendo") 
             : null;
 
-        try {
-            String email = authentication.getName();
-            Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
-            
-            Reporte actualizado = reporteService.finalizarReporte(
-                    id, email, resumen, userId, huboComparendo);
-            return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        String email = authentication.getName();
+        Usuario usuario = (Usuario) authentication.getPrincipal();
+        Reporte actualizado = reporteService.finalizarReporte(id, email, resumen, usuario.getId(), huboComparendo);
+        return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
     }
 
     // ================================
