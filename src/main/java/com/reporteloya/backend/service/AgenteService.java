@@ -82,7 +82,7 @@ public class AgenteService {
         agente.setDocumento(docAgente);
         agente.setEstado(request.getEstado() != null && !request.getEstado().isBlank()
                 ? request.getEstado().toUpperCase()
-                : "ACTIVO");
+                : "DISPONIBLE");
         agente.setFoto(request.getFoto());
         agente.setResumenProfesional1(request.getResumenProfesional1());
         agente.setResumenProfesional2(request.getResumenProfesional2());
