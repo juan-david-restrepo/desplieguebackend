@@ -34,7 +34,7 @@ public class Agentes extends Usuario {
     @OneToMany(mappedBy = "agente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarea> listaTareas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "agente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "agente", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference
     private List<Reporte> reportes;
 }

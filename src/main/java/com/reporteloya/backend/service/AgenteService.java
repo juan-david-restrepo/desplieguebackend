@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 public class AgenteService {
@@ -27,6 +29,10 @@ public class AgenteService {
 
     public List<Agentes> listarTodos() {
         return agenteRepository.findAll();
+    }
+
+    public Page<Agentes> listarTodosPaginado(Pageable pageable) {
+        return agenteRepository.findAll(pageable);
     }
 
     public Optional<Agentes> buscarPorPlaca(String placa) {

@@ -1,11 +1,15 @@
 package com.reporteloya.backend.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.reporteloya.backend.entity.Reporte;
@@ -47,6 +51,8 @@ import java.io.IOException;
 @Service
 public class ReporteService {
 
+    private static final Logger log = LoggerFactory.getLogger(ReporteService.class);
+
     private final ImageValidationService imageValidationService;
     private final AgenteRepository agenteRepository;
     private final ReporteRepository reporteRepository;
@@ -79,6 +85,7 @@ public class ReporteService {
     // ================================
     // CREAR REPORTE
     // ================================
+    @Transactional
     public Reporte crearReporte(
             String descripcion,
             String direccion,
@@ -108,15 +115,15 @@ public class ReporteService {
                 ImageValidationResult validationResult = imageValidationService.validarImagen(archivo, tipoInfraccion);
                 if (validationResult.isValida()) {
                     imagenValida = true;
-                    if (validationResult.getPlacaDetectada() != null && 
+                    if (validationResult.getPlacaDetectada() != null &&
                         (placa == null || placa.isBlank())) {
                         placaDetectadaIA = validationResult.getPlacaDetectada();
-                        System.out.println("PLACA DETECTADA POR IA: " + placaDetectadaIA);
+                        log.info("Placa detectada por IA: {}", placaDetectadaIA);
                     }
                     break;
                 } else {
                     motivoRechazo = validationResult.getMotivoRechazo();
-                    System.out.println("Imagen rechazada: " + motivoRechazo);
+                    log.info("Imagen rechazada: {}", motivoRechazo);
                 }
             } catch (Exception e) {
                 throw new RuntimeException("Error validando imagen con IA: " + e.getMessage());
@@ -165,11 +172,7 @@ public class ReporteService {
 
         Reporte guardado = reporteRepository.save(reporte);
         guardarEvidencias(archivos, guardado);
-
-        System.out.println("=== REPORTE CREADO ===");
-        System.out.println("Reporte ID: " + guardado.getId());
-        System.out.println("Usuario ID: " + (usuario != null ? usuario.getId() : "NULL"));
-        System.out.println("======================");
+        log.info("Reporte creado: id={}, usuario={}", guardado.getId(), usuario != null ? usuario.getId() : "NULL");
 
         Reporte reporteCompleto = reporteRepository.findById(guardado.getId()).orElse(guardado);
         ReporteSocketDTO dto = convertirADTO(reporteCompleto);
@@ -300,34 +303,20 @@ public class ReporteService {
     // ================================
     // AGENTE TOMA REPORTE (SOLO)
     // ================================
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Reporte tomarReporte(Long reporteId, String emailAgente, Long userId) {
 
-        Reporte reporte = reporteRepository.findById(reporteId)
+        Reporte reporte = reporteRepository.findByIdWithLock(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
 
         if (!"PENDIENTE".equals(reporte.getEstado())) {
             throw new RuntimeException("El reporte ya fue tomado");
         }
 
-        System.out.println("=== TOMAR REPORTE SERVICE ===");
-        System.out.println("Email: " + emailAgente);
-        System.out.println("User ID: " + userId);
-        
-        // Buscar por ID (más confiable con herencia JPA)
-        Agentes agentePorId = agenteRepository.findById(userId).orElse(null);
-        // También buscar por email para comparar (temporal, para debugging)
-        Agentes agentePorEmail = agenteRepository.findByEmail(emailAgente).orElse(null);
-        
-        System.out.println("Agente por ID: " + (agentePorId != null ? agentePorId.getNombre() + " (placa: " + agentePorId.getPlaca() + ")" : "NULL"));
-        System.out.println("Agente por Email: " + (agentePorEmail != null ? agentePorEmail.getNombre() + " (placa: " + agentePorEmail.getPlaca() + ")" : "NULL"));
-        System.out.println("==============================");
+        Agentes agente = agenteRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Agente no encontrado con ID: " + userId));
 
-        // Usar el agente encontrado por ID (más confiable)
-        Agentes agente = agentePorId;
-        
-        if (agente == null) {
-            throw new RuntimeException("Agente no encontrado con ID: " + userId);
-        }
+        log.info("Agente {} tomando reporte {}", agente.getPlaca(), reporteId);
 
         reporte.setAgente(agente);
         reporte.setEstado("EN_PROCESO");
@@ -341,11 +330,8 @@ public class ReporteService {
             new EstadoAgenteDTO(agente.getPlaca(), "OCUPADO"));
 
         Reporte actualizado = reporteRepository.save(reporte);
+        log.info("Reporte {} tomado por agente {}", reporteId, agente.getPlaca());
 
-        System.out.println("=== ANTES DE NOTIFICAR ===");
-        System.out.println("Reporte actualizado ID: " + actualizado.getId());
-        System.out.println("Reporte usuario: " + (actualizado.getUsuario() != null ? actualizado.getUsuario().getId() : "NULL"));
-        
         // Notificar al ciudadano que su reporte fue aceptado
         notificationService.notifyReporteAceptado(actualizado, agente);
 
@@ -358,30 +344,23 @@ public class ReporteService {
     // ================================
     // AGENTE TOMA REPORTE (ACOMPAÑADO)
     // ================================
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Reporte tomarReporteConCompanero(Long reporteId, String emailAgente, String placaCompanero, Long userId) {
 
-        Reporte reporte = reporteRepository.findById(reporteId)
+        Reporte reporte = reporteRepository.findByIdWithLock(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
 
         if (!"PENDIENTE".equals(reporte.getEstado())) {
             throw new RuntimeException("El reporte ya fue tomado");
         }
 
-        System.out.println("=== TOMAR REPORTE ACOMPAÑADO SERVICE ===");
-        System.out.println("Email: " + emailAgente);
-        System.out.println("User ID: " + userId);
-        System.out.println("Placa Compañero: " + placaCompanero);
-        
-        // Agente principal (por ID, más confiable)
         Agentes agente = agenteRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Agente principal no encontrado con ID: " + userId));
-        System.out.println("Agente principal: " + agente.getNombre() + " (placa: " + agente.getPlaca() + ")");
 
-        // Agente compañero (por placa)
         Agentes companero = agenteRepository.findByPlacaIgnoreCase(placaCompanero)
                 .orElseThrow(() -> new RuntimeException("Agente compañero no encontrado con placa: " + placaCompanero));
-        System.out.println("Agente compañero: " + companero.getNombre() + " (placa: " + companero.getPlaca() + ")");
-        System.out.println("=======================================");
+
+        log.info("Agente {} tomando reporte {} con compañero {}", agente.getPlaca(), reporteId, companero.getPlaca());
 
         // Validar que el compañero esté libre (case-insensitive)
         if (companero.getEstado() == null || !"DISPONIBLE".equalsIgnoreCase(companero.getEstado())) {
@@ -457,6 +436,7 @@ public class ReporteService {
     // ================================
     // FINALIZAR REPORTE
     // ================================
+    @Transactional
     public Reporte finalizarReporte(Long reporteId, String emailAgente, String resumen, Long userId, Boolean huboComparendo) {
 
         Reporte reporte = reporteRepository.findById(reporteId)
@@ -466,12 +446,7 @@ public class ReporteService {
             throw new RuntimeException("El reporte no está en proceso");
         }
 
-        System.out.println("=== FINALIZAR REPORTE SERVICE ===");
-        System.out.println("Reporte ID: " + reporteId);
-        System.out.println("Email: " + emailAgente);
-        System.out.println("User ID: " + userId);
-        System.out.println("Hubo Comparendo: " + huboComparendo);
-        System.out.println("================================");
+        log.info("Finalizando reporte {} por agente userId={}", reporteId, userId);
 
         reporte.setEstado("FINALIZADO");
         reporte.setResumenOperativo(resumen);
@@ -531,11 +506,7 @@ public class ReporteService {
 
         String placa = agente.getPlaca();
         
-        System.out.println("=== OBTENER REPORTES AGENTE ===");
-        System.out.println("Email: " + emailAgente);
-        System.out.println("User ID: " + userId);
-        System.out.println("Agente: " + agente.getNombre() + " (placa: " + placa + ")");
-        System.out.println("==============================");
+        log.debug("Obteniendo reportes para agente {} (id={})", placa, userId);
 
         List<Reporte> pendientes = reporteRepository.findByEstado("PENDIENTE");
 
@@ -808,14 +779,7 @@ public class ReporteService {
         int comparendosSi = reporteRepository.countComparendosSiPorAgente(placa, fechaInicioDateTime, fechaFinDateTime);
         int comparendosNo = totalFinalizadosAgente - comparendosSi;
 
-        // Log para debug
-        System.out.println("=== ESTADISTICAS COMPLETAS ===");
-        System.out.println("placa: " + placa);
-        System.out.println("fechaInicio: " + fechaInicioDateTime);
-        System.out.println("fechaFin: " + fechaFinDateTime);
-        System.out.println("reportesResueltos: " + reportesResueltos);
-        System.out.println("comparendosSi: " + comparendosSi);
-        System.out.println("comparendosNo (calculado): " + comparendosNo);
+        log.debug("Estadísticas agente {} [{} - {}]: resueltos={}, comparendos={}", placa, fechaInicioDateTime, fechaFinDateTime, reportesResueltos, comparendosSi);
 
         // Obtener estadísticas de gráficas filtradas por rango de fechas
         List<EstadisticaGraficaDTO.StatItem> statsSemana = obtenerStatsDesdeBDPorFechas(
