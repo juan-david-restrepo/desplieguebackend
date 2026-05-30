@@ -102,4 +102,7 @@ public class Reporte {
     private LocalDateTime fechaFinalizado;
 
     private LocalDateTime fechaRechazado;
+
+    @Column(length = 500)
+    private String motivoRechazo;
 }

@@ -16,6 +16,9 @@ public class Agentes extends Usuario {
     private String documento;
     private String telefono;
     private String estado;
+
+    @Column(nullable = false)
+    private boolean activo = true;
     @Column(length = 1000)
     private String foto;
     
@@ -30,6 +33,11 @@ public class Agentes extends Usuario {
     
     @Column(length = 40)
     private String resumenProfesional4;
+
+    @Override
+    public boolean isEnabled() {
+        return activo;
+    }
 
     @OneToMany(mappedBy = "agente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Tarea> listaTareas = new ArrayList<>();

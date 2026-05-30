@@ -290,6 +290,8 @@ public class ReporteService {
                 : null
         );
 
+        dto.setMotivoRechazo(reporte.getMotivoRechazo());
+
         return dto;
     }
 
@@ -403,7 +405,8 @@ public class ReporteService {
     // RECHAZAR REPORTE
     // Se guarda en historial con estado RECHAZADO (sin resumen).
     // ================================
-    public Reporte rechazarReporte(Long reporteId, String emailAgente, Long userId) {
+    @Transactional
+    public Reporte rechazarReporte(Long reporteId, String emailAgente, Long userId, String motivo) {
 
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -418,6 +421,7 @@ public class ReporteService {
         reporte.setAgente(agente);
         reporte.setEstado("RECHAZADO");
         reporte.setFechaRechazado(LocalDateTime.now());
+        reporte.setMotivoRechazo(motivo != null ? motivo.trim() : null);
         reporte.setResumenOperativo(null);
 
         Reporte actualizado = reporteRepository.save(reporte);

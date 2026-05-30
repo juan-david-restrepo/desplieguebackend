@@ -78,18 +78,24 @@ public class AuthService {
         );
         emailVerificationRepository.save(verificationToken);
 
+        boolean emailEnviado = true;
         try {
             String enlaceVerificacion = verificationUrl + "?token=" + token;
             emailService.enviarCorreoVerificacion(request.getEmail(), enlaceVerificacion);
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Error al enviar correo de verificación", e);
-            throw new IllegalArgumentException("No pudimos enviarte el correo de verificación. Verifica que la dirección sea correcta e intenta registrarte nuevamente.");
+            logger.log(Level.WARNING, "No se pudo enviar correo de verificación a: " + request.getEmail(), e);
+            emailEnviado = false;
         }
 
+        String mensaje = emailEnviado
+            ? "Registro exitoso. Por favor, verifica tu correo electrónico."
+            : "Cuenta creada. No pudimos enviarte el correo de verificación. Usa la opción 'Reenviar verificación' en el login.";
+
         return Map.of(
-            "message", "Registro exitoso. Por favor, verifica tu correo electrónico.",
+            "message", mensaje,
             "email", request.getEmail(),
-            "success", true
+            "success", true,
+            "emailEnviado", emailEnviado
         );
     }
 

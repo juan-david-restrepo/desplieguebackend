@@ -141,14 +141,16 @@ public class ReporteController {
     @PostMapping("/rechazar/{id}")
     public ResponseEntity<?> rechazarReporte(
             @PathVariable Long id,
+            @RequestBody(required = false) java.util.Map<String, String> body,
             Authentication authentication) {
 
         try {
             String email = authentication.getName();
             Usuario usuario = (Usuario) authentication.getPrincipal();
             Long userId = usuario.getId();
-            
-            Reporte actualizado = reporteService.rechazarReporte(id, email, userId);
+            String motivo = body != null ? body.get("motivo") : null;
+
+            Reporte actualizado = reporteService.rechazarReporte(id, email, userId, motivo);
             return ResponseEntity.ok(reporteService.convertirADTO(actualizado));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

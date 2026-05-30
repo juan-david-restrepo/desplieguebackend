@@ -35,6 +35,24 @@ public class AgenteService {
         return agenteRepository.findAll(pageable);
     }
 
+    @Transactional
+    public Agentes desactivarAgente(Long id) {
+        Agentes agente = agenteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Agente no encontrado"));
+        agente.setActivo(false);
+        agente.setEstado("FUERA_SERVICIO");
+        return agenteRepository.save(agente);
+    }
+
+    @Transactional
+    public Agentes activarAgente(Long id) {
+        Agentes agente = agenteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Agente no encontrado"));
+        agente.setActivo(true);
+        agente.setEstado("DISPONIBLE");
+        return agenteRepository.save(agente);
+    }
+
     public Optional<Agentes> buscarPorPlaca(String placa) {
         return agenteRepository.findByPlacaIgnoreCase(placa);
     }

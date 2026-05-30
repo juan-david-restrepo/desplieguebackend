@@ -87,6 +87,29 @@ public class AdminController {
     }
 
     // =========================
+    // DESACTIVAR / ACTIVAR AGENTE
+    // =========================
+    @PutMapping("/agentes/{id}/desactivar")
+    public ResponseEntity<?> desactivarAgente(@PathVariable Long id) {
+        try {
+            Agentes agente = agenteService.desactivarAgente(id);
+            return ResponseEntity.ok(toAdminDTO(agente));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/agentes/{id}/activar")
+    public ResponseEntity<?> activarAgente(@PathVariable Long id) {
+        try {
+            Agentes agente = agenteService.activarAgente(id);
+            return ResponseEntity.ok(toAdminDTO(agente));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // =========================
     // BUSCAR POR PLACA
     // =========================
     @GetMapping("/agentes/{placa}")

@@ -37,4 +37,6 @@ public class ReporteSocketDTO {
 
     // Fecha de creación del reporte (yyyy-MM-dd) para filtros de mapa
     private String createdAt;
+
+    private String motivoRechazo;
 }
