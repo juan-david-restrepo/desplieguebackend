@@ -52,7 +52,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/reportes/crear").authenticated()
                                                 .requestMatchers("/api/reportes/mapa").authenticated()
                                                 .requestMatchers("/api/reportes/pendientes").authenticated()
-                                                .requestMatchers("/api/reportes/todos").authenticated()
+                                                .requestMatchers("/api/reportes/todos").permitAll()
                                                 .requestMatchers("/api/reportes/estadisticas-admin").hasRole("ADMIN")
                                                 .requestMatchers("/api/reportes").authenticated()
 
