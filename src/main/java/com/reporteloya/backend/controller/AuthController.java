@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -39,6 +40,12 @@ public class AuthController {
     private final JwtService jwtService;
     private final ChatAISyncService chatAISyncService;
     private final RateLimitService rateLimitService;
+
+    @Value("${app.cookie.secure:false}")
+    private boolean cookieSecure;
+
+    @Value("${app.cookie.same-site:Lax}")
+    private String cookieSameSite;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request,
@@ -181,10 +188,10 @@ public class AuthController {
 
         ResponseCookie cookie = ResponseCookie.from("jwt", "")
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite(cookieSameSite)
                 .build();
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -224,10 +231,10 @@ public class AuthController {
     private void setJwtCookie(HttpServletResponse response, String token, long maxAgeSeconds) {
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
-                .secure(true)
+                .secure(cookieSecure)
                 .path("/")
                 .maxAge(maxAgeSeconds)
-                .sameSite("None")
+                .sameSite(cookieSameSite)
                 .build();
 
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());

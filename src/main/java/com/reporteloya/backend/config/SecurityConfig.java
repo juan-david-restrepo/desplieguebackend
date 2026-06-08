@@ -80,6 +80,13 @@ public class SecurityConfig {
                                                 .anyRequest().authenticated())
 
                                 // =========================
+                                // 401 para no autenticados (en vez de 403)
+                                // =========================
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint((request, response, authException) ->
+                                                                response.sendError(401, "Unauthorized")))
+
+                                // =========================
                                 // STATELESS
                                 // =========================
                                 .sessionManagement(session -> session

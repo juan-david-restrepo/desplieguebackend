@@ -12,7 +12,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
 
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("https://frontend-eight-beta-69.vercel.app")
+                .setAllowedOriginPatterns(
+                        "https://frontend-eight-beta-69.vercel.app",
+                        "http://localhost:4200",
+                        "http://127.0.0.1:4200"
+                )
                 .withSockJS();
     }
 

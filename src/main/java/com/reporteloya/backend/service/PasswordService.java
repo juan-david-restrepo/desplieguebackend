@@ -135,6 +135,7 @@ public class PasswordService {
     /**
      * 🧹 Limpieza automática de tokens expirados cada 10 minutos
      */
+    @Transactional
     @Scheduled(fixedRate = 600000)
     public void limpiarTokensExpirados() {
         tokenRepository.deleteByExpirationDateBefore(LocalDateTime.now());
