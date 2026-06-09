@@ -19,7 +19,7 @@ public class EmailService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${brevo.api.key}")
+    @Value("${brevo.api.key:}")
     private String apiKey;
 
     @Value("${brevo.from.email:noreply@reporteloya.com}")
@@ -82,6 +82,10 @@ public class EmailService {
     }
 
     private void enviar(String destinatario, String subject, String html) {
+        if (apiKey == null || apiKey.isBlank()) {
+            log.error("BREVO_API_KEY no configurada - correo no enviado a {}", destinatario);
+            return;
+        }
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
