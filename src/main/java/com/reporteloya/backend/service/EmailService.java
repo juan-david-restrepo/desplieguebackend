@@ -19,10 +19,10 @@ public class EmailService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${brevo.api.key:}")
+    @Value("${BREVO_API_KEY:}")
     private String apiKey;
 
-    @Value("${brevo.from.email:noreply@reporteloya.com}")
+    @Value("${BREVO_FROM_EMAIL:noreply@reporteloya.com}")
     private String fromEmail;
 
     @Async
