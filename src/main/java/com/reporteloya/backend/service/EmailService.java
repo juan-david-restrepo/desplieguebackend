@@ -17,7 +17,7 @@ import java.util.Map;
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
+    private static final String BREVO_URL = "https://api.sendinblue.com/v3/smtp/email";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -99,6 +99,7 @@ public class EmailService {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Accept", "application/json");
             headers.set("api-key", apiKey);
 
             Map<String, Object> body = Map.of(
