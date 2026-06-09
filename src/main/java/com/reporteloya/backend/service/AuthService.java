@@ -180,12 +180,10 @@ public class AuthService {
                             request.getPassword()
                     )
             );
+        } catch (org.springframework.security.authentication.DisabledException e) {
+            throw new IllegalArgumentException("Debes verificar tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.");
         } catch (Exception e) {
             throw new BadCredentialsException("La contraseña es incorrecta.");
-        }
-
-        if (!usuario.isEmailVerificado() && usuario.getRole() == Role.CIUDADANO) {
-            throw new BadCredentialsException("Debes verificar tu correo electrónico antes de iniciar sesión.");
         }
 
         String jwtToken = jwtService.generateTokenWithRole(usuario, usuario.getRole());
