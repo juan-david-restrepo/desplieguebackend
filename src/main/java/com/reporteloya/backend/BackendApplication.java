@@ -2,11 +2,10 @@ package com.reporteloya.backend;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.sendgrid.SendGridAutoConfiguration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication(scanBasePackages = "com.reporteloya.backend", exclude = SendGridAutoConfiguration.class)
+@SpringBootApplication(scanBasePackages = "com.reporteloya.backend")
 @EnableScheduling
 @EnableAsync
 public class BackendApplication {
