@@ -1,6 +1,5 @@
 package com.reporteloya.backend.service;
 
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +16,7 @@ import java.util.Map;
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private static final String BREVO_URL = "https://api.sendinblue.com/v3/smtp/email";
+    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -26,14 +25,6 @@ public class EmailService {
 
     @Value("${BREVO_FROM_EMAIL:noreply@reporteloya.com}")
     private String fromEmail;
-
-    @PostConstruct
-    public void init() {
-        log.info("Brevo config - key length: {}, key starts: '{}', from: '{}'",
-            apiKey != null ? apiKey.length() : 0,
-            apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 10) : "(vacío)",
-            fromEmail);
-    }
 
     @Async
     public void enviarCorreoRecuperacion(String destinatario, String enlace) {
@@ -118,9 +109,7 @@ public class EmailService {
                 log.error("Error Brevo API - status: {} body: {}", response.getStatusCode(), response.getBody());
             }
         } catch (HttpClientErrorException e) {
-            log.error("Brevo {} - body: '{}' - key usado (10 chars): '{}'",
-                e.getStatusCode(), e.getResponseBodyAsString(),
-                apiKey != null && apiKey.length() > 10 ? apiKey.substring(0, 10) : "(vacío)");
+            log.error("Error Brevo {} - body: {}", e.getStatusCode(), e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("Error enviando correo a {}: {}", destinatario, e.getMessage());
         }
