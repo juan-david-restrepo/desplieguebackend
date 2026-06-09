@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +21,7 @@ public class EmailService {
     @Value("${spring.mail.from-email:noreply@reporteloya.com}")
     private String fromEmail;
 
+    @Async
     public void enviarCorreoRecuperacion(String destinatario, String enlace) {
         String subject = "Recupera tu contraseña - RepórteloYa";
         String html = """
@@ -49,6 +51,7 @@ public class EmailService {
         enviar(destinatario, subject, html);
     }
 
+    @Async
     public void enviarCorreoVerificacion(String destinatario, String enlace) {
         String subject = "Verifica tu correo electrónico - RepórteloYa";
         String html = """
@@ -89,7 +92,6 @@ public class EmailService {
             log.info("Correo enviado a {}", destinatario);
         } catch (Exception e) {
             log.error("Error enviando correo a {}: {}", destinatario, e.getMessage());
-            throw new RuntimeException("Error enviando correo", e);
         }
     }
 }
