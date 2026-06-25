@@ -9,11 +9,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.reporteloya.backend.entity.EstadisticaAgente;
+import java.util.UUID;
 
 @Repository
-public interface EstadisticaAgenteRepository extends JpaRepository<EstadisticaAgente, Long> {
+public interface EstadisticaAgenteRepository extends JpaRepository<EstadisticaAgente, UUID> {
 
-    List<EstadisticaAgente> findByAgenteIdAndPeriodoOrderByEtiquetaAsc(Long agenteId, String periodo);
+    List<EstadisticaAgente> findByAgenteIdAndPeriodoOrderByEtiquetaAsc(UUID agenteId, String periodo);
 
     List<EstadisticaAgente> findByAgentePlacaAndPeriodoOrderByEtiquetaAsc(String placa, String periodo);
 

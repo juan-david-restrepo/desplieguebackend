@@ -1,12 +1,13 @@
 package com.reporteloya.backend.repository;
 
-import com.reporteloya.backend.entity.Agentes; // <--- Importante corregir esto
+import com.reporteloya.backend.entity.Agentes;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface AgenteRepository extends JpaRepository<Agentes, Long> {
+public interface AgenteRepository extends JpaRepository<Agentes, UUID> {
     Optional<Agentes> findByPlaca(String placa);
 
     Optional<Agentes> findByPlacaIgnoreCase(String placa);

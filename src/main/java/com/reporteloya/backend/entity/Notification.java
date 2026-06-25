@@ -3,6 +3,7 @@ package com.reporteloya.backend.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "notificaciones")
@@ -10,8 +11,9 @@ import java.time.LocalDateTime;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agente_id", nullable = true)
@@ -36,8 +38,8 @@ public class Notification {
     @Column(name = "fecha_creacion", nullable = false)
     private LocalDateTime fechaCreacion;
 
-    @Column(name = "id_referencia")
-    private Long idReferencia;
+    @Column(name = "id_referencia", columnDefinition = "VARCHAR(36)")
+    private UUID idReferencia;
 
     @Column(name = "datos_adicionales", length = 2000)
     private String datosAdicionales;

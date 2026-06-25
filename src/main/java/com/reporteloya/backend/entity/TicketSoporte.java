@@ -1,6 +1,7 @@
 package com.reporteloya.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "ticket_soporte")
@@ -17,17 +19,22 @@ import java.util.List;
 public class TicketSoporte {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @Column(nullable = false, length = 255)
+    @NotBlank
+    @Size(max = 255)
     private String titulo;
 
     @Column(nullable = false, columnDefinition = "TEXT")
+    @NotBlank
+    @Size(max = 5000)
     private String descripcion;
 
     @Enumerated(EnumType.STRING)

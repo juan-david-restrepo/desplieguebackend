@@ -7,30 +7,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    
+public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+
     @Query("SELECT n FROM Notification n WHERE n.agente.id = :agenteId AND n.leida = false ORDER BY n.fechaCreacion DESC")
-    List<Notification> findNoLeidasPorAgenteId(@Param("agenteId") Long agenteId);
-    
+    List<Notification> findNoLeidasPorAgenteId(@Param("agenteId") UUID agenteId);
+
     @Query("SELECT n FROM Notification n WHERE n.agente.id = :agenteId ORDER BY n.fechaCreacion DESC")
-    List<Notification> findPorAgenteId(@Param("agenteId") Long agenteId);
+    List<Notification> findPorAgenteId(@Param("agenteId") UUID agenteId);
 
     @Query("SELECT n FROM Notification n WHERE n.usuario.id = :usuarioId AND n.leida = false ORDER BY n.fechaCreacion DESC")
-    List<Notification> findNoLeidasPorUsuarioId(@Param("usuarioId") Long usuarioId);
-    
+    List<Notification> findNoLeidasPorUsuarioId(@Param("usuarioId") UUID usuarioId);
+
     @Query("SELECT n FROM Notification n WHERE n.usuario.id = :usuarioId ORDER BY n.fechaCreacion DESC")
-    List<Notification> findPorUsuarioId(@Param("usuarioId") Long usuarioId);
+    List<Notification> findPorUsuarioId(@Param("usuarioId") UUID usuarioId);
 
     @Query("SELECT n FROM Notification n WHERE n.usuario.id = :usuarioId ORDER BY n.fechaCreacion DESC LIMIT 50")
-    List<Notification> findUltimas50PorUsuarioId(@Param("usuarioId") Long usuarioId);
-    
+    List<Notification> findUltimas50PorUsuarioId(@Param("usuarioId") UUID usuarioId);
+
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.usuario.id = :usuarioId AND n.id NOT IN (SELECT n2.id FROM Notification n2 WHERE n2.usuario.id = :usuarioId ORDER BY n2.fechaCreacion DESC LIMIT 50)")
-    void eliminarExtrasParaUsuario(@Param("usuarioId") Long usuarioId);
+    void eliminarExtrasParaUsuario(@Param("usuarioId") UUID usuarioId);
 
     @Modifying
     @Query("UPDATE Notification n SET n.leida = true WHERE n.agente.id = :agenteId AND n.leida = false")
-    int marcarTodasLeidasPorAgenteId(@Param("agenteId") Long agenteId);
+    int marcarTodasLeidasPorAgenteId(@Param("agenteId") UUID agenteId);
 }

@@ -6,17 +6,19 @@ import lombok.Data;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "tareas")
 @Data
-@ToString(exclude = "agente") // Evita bucles infinitos en el log
-@EqualsAndHashCode(exclude = "agente") // Evita errores de recursividad
+@ToString(exclude = "agente")
+@EqualsAndHashCode(exclude = "agente")
 public class Tarea {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
     private String titulo;
     private String descripcion;
     @Column(name = "resumen_operativo")

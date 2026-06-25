@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.UUID;
 import java.io.IOException;
 
 
@@ -306,7 +307,7 @@ public class ReporteService {
     // AGENTE TOMA REPORTE (SOLO)
     // ================================
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Reporte tomarReporte(Long reporteId, String emailAgente, Long userId) {
+    public Reporte tomarReporte(UUID reporteId, String emailAgente, UUID userId) {
 
         Reporte reporte = reporteRepository.findByIdWithLock(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -347,7 +348,7 @@ public class ReporteService {
     // AGENTE TOMA REPORTE (ACOMPAÑADO)
     // ================================
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Reporte tomarReporteConCompanero(Long reporteId, String emailAgente, String placaCompanero, Long userId) {
+    public Reporte tomarReporteConCompanero(UUID reporteId, String emailAgente, String placaCompanero, UUID userId) {
 
         Reporte reporte = reporteRepository.findByIdWithLock(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -406,7 +407,7 @@ public class ReporteService {
     // Se guarda en historial con estado RECHAZADO (sin resumen).
     // ================================
     @Transactional
-    public Reporte rechazarReporte(Long reporteId, String emailAgente, Long userId, String motivo) {
+    public Reporte rechazarReporte(UUID reporteId, String emailAgente, UUID userId, String motivo) {
 
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -441,7 +442,7 @@ public class ReporteService {
     // FINALIZAR REPORTE
     // ================================
     @Transactional
-    public Reporte finalizarReporte(Long reporteId, String emailAgente, String resumen, Long userId, Boolean huboComparendo) {
+    public Reporte finalizarReporte(UUID reporteId, String emailAgente, String resumen, UUID userId, Boolean huboComparendo) {
 
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
@@ -503,7 +504,7 @@ public class ReporteService {
     // REPORTES ACTIVOS DEL AGENTE
     // (PENDIENTES GLOBALES + SUS EN_PROCESO)
     // ================================
-    public List<ReporteSocketDTO> obtenerReportesDTOParaAgente(String emailAgente, Long userId) {
+    public List<ReporteSocketDTO> obtenerReportesDTOParaAgente(String emailAgente, UUID userId) {
 
         Agentes agente = agenteRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Agente no encontrado con ID: " + userId));
@@ -529,7 +530,7 @@ public class ReporteService {
     // HISTORIAL DEL AGENTE
     // (Reportes FINALIZADOS donde participó)
     // ================================
-    public List<ReporteSocketDTO> obtenerHistorialAgente(String emailAgente, Long userId) {
+    public List<ReporteSocketDTO> obtenerHistorialAgente(String emailAgente, UUID userId) {
 
         Agentes agente = agenteRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Agente no encontrado con ID: " + userId));
@@ -747,7 +748,7 @@ public class ReporteService {
     // ================================
     // OBTENER ESTADÍSTICAS COMPLETAS (TARJETAS + GRÁFICAS)
     // ================================
-    public EstadisticasCompletasDTO obtenerEstadisticasCompletas(String emailAgente, Long userId, String fechaInicio, String fechaFin) {
+    public EstadisticasCompletasDTO obtenerEstadisticasCompletas(String emailAgente, UUID userId, String fechaInicio, String fechaFin) {
         Agentes agente = agenteRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Agente no encontrado con ID: " + userId));
 
@@ -898,7 +899,7 @@ public class ReporteService {
     }
 
 
-    public void eliminarReporte(Long reporteId, Long usuarioId) {
+    public void eliminarReporte(UUID reporteId, UUID usuarioId) {
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
         
@@ -914,13 +915,13 @@ public class ReporteService {
     }
 
 
-    public List<Reporte> obtenerReportesPorUsuario(Long usuarioId) {
+    public List<Reporte> obtenerReportesPorUsuario(UUID usuarioId) {
         return reporteRepository.findByUsuario_IdOrderByCreatedAtDesc(usuarioId);
     }
 
 
 
-    public Reporte actualizarReporte(Long reporteId, Long usuarioId, String descripcion, String direccion, 
+    public Reporte actualizarReporte(UUID reporteId, UUID usuarioId, String descripcion, String direccion,
             Double latitud, Double longitud, String placa, String fechaIncidente, String horaIncidente,
             String tipoInfraccion) {
         Reporte reporte = reporteRepository.findById(reporteId)
@@ -960,7 +961,7 @@ public class ReporteService {
         return reporteRepository.save(reporte);
     }
 
-    public ReporteReportesDTO obtenerEstadisticas(Long usuarioId) {
+    public ReporteReportesDTO obtenerEstadisticas(UUID usuarioId) {
         int total = reporteRepository.countByUsuarioId(usuarioId);
         int pendientes = reporteRepository.countByUsuarioIdAndEstado(usuarioId, "PENDIENTE");
         int enProceso = reporteRepository.countByUsuarioIdAndEstado(usuarioId, "EN_PROCESO");

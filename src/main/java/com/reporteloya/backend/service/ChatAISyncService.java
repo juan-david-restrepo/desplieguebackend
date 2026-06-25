@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ChatAISyncService {
@@ -21,7 +22,7 @@ public class ChatAISyncService {
     }
 
     @Async
-    public void syncUser(Long userId, String email, String nombreCompleto,
+    public void syncUser(UUID userId, String email, String nombreCompleto,
                          String role, String tipoDocumento, String numeroDocumento) {
         try {
             Map<String, Object> request = Map.of(

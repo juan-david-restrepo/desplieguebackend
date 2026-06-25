@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,7 +73,7 @@ public class SoporteService {
         return ResponseEntity.ok(dtos);
     }
 
-    public ResponseEntity<?> obtenerTicketConMensajes(Long ticketId, Authentication auth) {
+    public ResponseEntity<?> obtenerTicketConMensajes(UUID ticketId, Authentication auth) {
         Usuario usuario = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -87,7 +88,7 @@ public class SoporteService {
     }
 
     @Transactional
-    public ResponseEntity<?> agregarMensaje(Long ticketId, ResponderTicketRequest request, Authentication auth) {
+    public ResponseEntity<?> agregarMensaje(UUID ticketId, ResponderTicketRequest request, Authentication auth) {
         Usuario usuario = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -122,7 +123,7 @@ public class SoporteService {
         return ResponseEntity.ok(dtos);
     }
 
-    public ResponseEntity<?> obtenerTicketAdmin(Long ticketId) {
+    public ResponseEntity<?> obtenerTicketAdmin(UUID ticketId) {
         TicketSoporte ticket = ticketRepository.findByIdWithMensajes(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket no encontrado"));
 
@@ -130,7 +131,7 @@ public class SoporteService {
     }
 
     @Transactional
-    public ResponseEntity<?> responderComoAdmin(Long ticketId, ResponderTicketRequest request, Authentication auth) {
+    public ResponseEntity<?> responderComoAdmin(UUID ticketId, ResponderTicketRequest request, Authentication auth) {
         Usuario admin = usuarioRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -164,7 +165,7 @@ public class SoporteService {
     }
 
     @Transactional
-    public ResponseEntity<?> cerrarTicket(Long ticketId) {
+    public ResponseEntity<?> cerrarTicket(UUID ticketId) {
         TicketSoporte ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket no encontrado"));
 

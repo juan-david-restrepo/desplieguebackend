@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.OneToMany;
@@ -21,6 +22,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.CascadeType;
 import java.util.List;
+import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -33,9 +35,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Reporte {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_reporte")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_reporte", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "id_usuario")
@@ -55,11 +57,20 @@ public class Reporte {
     @Enumerated(EnumType.STRING)
     private Prioridad prioridad;
 
+    @Size(max = 100)
     private String tipoInfraccion;
+
+    @Size(max = 1000)
     private String descripcion;
+
+    @Size(max = 500)
     private String direccion;
+
     private Double latitud;
     private Double longitud;
+
+    @Size(max = 20)
+    @Pattern(regexp = "^[A-Z0-9\\-]*$", message = "Placa inválida")
     private String placa;
 
     private String estado;

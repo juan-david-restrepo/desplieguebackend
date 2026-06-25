@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import java.util.UUID;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -91,7 +92,7 @@ public class AdminController {
     // DESACTIVAR / ACTIVAR AGENTE
     // =========================
     @PutMapping("/agentes/{id}/desactivar")
-    public ResponseEntity<?> desactivarAgente(@PathVariable Long id) {
+    public ResponseEntity<?> desactivarAgente(@PathVariable UUID id) {
         try {
             Agentes agente = agenteService.desactivarAgente(id);
             return ResponseEntity.ok(toAdminDTO(agente));
@@ -101,7 +102,7 @@ public class AdminController {
     }
 
     @PutMapping("/agentes/{id}/activar")
-    public ResponseEntity<?> activarAgente(@PathVariable Long id) {
+    public ResponseEntity<?> activarAgente(@PathVariable UUID id) {
         try {
             Agentes agente = agenteService.activarAgente(id);
             return ResponseEntity.ok(toAdminDTO(agente));
@@ -206,7 +207,7 @@ public class AdminController {
     @DeleteMapping("/tareas/{id}")
 
     @Transactional // Garantiza que los cambios se apliquen en la BD
-    public ResponseEntity<Void> eliminarTarea(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminarTarea(@PathVariable UUID id) {
         return tareaRepository.findById(id).map(tarea -> {
             // 1. Rompemos el vínculo en Java para evitar conflictos de Foreign Key
             Agentes agente = tarea.getAgente();

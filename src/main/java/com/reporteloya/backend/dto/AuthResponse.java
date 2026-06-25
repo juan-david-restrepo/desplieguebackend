@@ -17,7 +17,7 @@ public class AuthResponse {
     // private String token;
 
     // Datos del usuario
-    private Long userId;
+    private java.util.UUID userId;
     private String email;
     private Role role;
 

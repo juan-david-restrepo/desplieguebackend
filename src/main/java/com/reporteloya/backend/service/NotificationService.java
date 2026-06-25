@@ -14,6 +14,7 @@ import com.reporteloya.backend.entity.TicketSoporte;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class NotificationService {
@@ -138,9 +139,9 @@ public class NotificationService {
         enviarNotificacionCiudadano(notificacion, usuario.getEmail());
     }
 
-    private Notification crearNotificacion(String tipo, String titulo, String mensaje, 
+    private Notification crearNotificacion(String tipo, String titulo, String mensaje,
                                              Usuario usuario, Agentes agente,
-                                             Long idReferencia, 
+                                             UUID idReferencia,
                                              Map<String, Object> datosAdicionales) {
         Notification notificacion = new Notification();
         notificacion.setTipo(tipo);
@@ -190,7 +191,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void cleanupNotificacionesAntiguas(Long usuarioId) {
+    public void cleanupNotificacionesAntiguas(UUID usuarioId) {
         notificationRepository.eliminarExtrasParaUsuario(usuarioId);
     }
 

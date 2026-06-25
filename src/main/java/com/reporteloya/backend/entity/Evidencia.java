@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Entity
@@ -14,9 +16,9 @@ import lombok.Setter;
 public class Evidencia {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_evidencia")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_evidencia", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     private String tipo;
     private String archivo;

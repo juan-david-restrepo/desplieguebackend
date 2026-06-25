@@ -1,6 +1,7 @@
 package com.reporteloya.backend.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -22,9 +23,9 @@ import lombok.Setter;
 public class EstadisticaAgente {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_estadistica")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_estadistica", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "id_agente")

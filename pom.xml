@@ -131,6 +131,12 @@
             <version>2.3.0</version>
         </dependency>
 
+        <!-- Bean Validation (OWASP A03 - Input Validation) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

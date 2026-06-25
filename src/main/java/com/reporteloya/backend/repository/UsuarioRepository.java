@@ -3,8 +3,9 @@ package com.reporteloya.backend.repository;
 import com.reporteloya.backend.entity.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<Usuario, UUID> {
 
     // 1. (Se Mantiene) CRÍTICO para el Login y Spring Security
     // Permite buscar un usuario por su email para autenticación.

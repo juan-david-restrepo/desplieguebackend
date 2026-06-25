@@ -6,19 +6,20 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class TicketDetalleDTO {
-    private Long id;
+    private UUID id;
     private String titulo;
     private String descripcion;
     private String prioridad;
     private String estado;
     private String nombreUsuario;
-    private Long usuarioId;
+    private UUID usuarioId;
     private int cantidadMensajes;
     private String ultimoMensaje;
     private java.time.LocalDateTime fechaCreacion;

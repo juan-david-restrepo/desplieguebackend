@@ -10,9 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface TicketSoporteRepository extends JpaRepository<TicketSoporte, Long> {
+public interface TicketSoporteRepository extends JpaRepository<TicketSoporte, UUID> {
 
     List<TicketSoporte> findByUsuarioOrderByFechaActualizacionDesc(Usuario usuario);
 
@@ -23,8 +24,8 @@ public interface TicketSoporteRepository extends JpaRepository<TicketSoporte, Lo
     long countByEstado(EstadoTicket estado);
 
     @Query("SELECT t FROM TicketSoporte t LEFT JOIN FETCH t.mensajes WHERE t.id = :id")
-    Optional<TicketSoporte> findByIdWithMensajes(@Param("id") Long id);
+    Optional<TicketSoporte> findByIdWithMensajes(@Param("id") UUID id);
 
     @Query("SELECT t FROM TicketSoporte t WHERE t.usuario.id = :usuarioId ORDER BY t.fechaActualizacion DESC")
-    List<TicketSoporte> findByUsuarioIdOrderByFechaActualizacionDesc(@Param("usuarioId") Long usuarioId);
+    List<TicketSoporte> findByUsuarioIdOrderByFechaActualizacionDesc(@Param("usuarioId") UUID usuarioId);
 }

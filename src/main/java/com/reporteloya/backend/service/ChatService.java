@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class ChatService {
@@ -13,7 +14,7 @@ public class ChatService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String aiChatUrl = "https://backend-ia-8in0.onrender.com/chat";
 
-    public Map<String, Object> sendMessage(Long userId, Integer conversationId, String message) {
+    public Map<String, Object> sendMessage(UUID userId, Integer conversationId, String message) {
 
         ChatRequest request = new ChatRequest(userId, conversationId, message);
 

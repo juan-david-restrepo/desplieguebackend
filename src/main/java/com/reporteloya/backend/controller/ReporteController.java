@@ -2,6 +2,7 @@ package com.reporteloya.backend.controller;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +68,7 @@ public class ReporteController {
     // ================================
     @PostMapping("/aceptar/{id}")
     public ResponseEntity<?> tomarReporte(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             Authentication authentication) {
 
         String email = authentication.getName();
@@ -82,7 +83,7 @@ public class ReporteController {
     // ================================
     @PostMapping("/aceptar/{id}/acompanado")
     public ResponseEntity<?> tomarReporteAcompanado(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Map<String, String> body,
             Authentication authentication) {
 
@@ -104,7 +105,7 @@ public class ReporteController {
     // ================================
     @PostMapping("/rechazar/{id}")
     public ResponseEntity<?> rechazarReporte(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody(required = false) java.util.Map<String, String> body,
             Authentication authentication) {
 
@@ -120,7 +121,7 @@ public class ReporteController {
     // ================================
     @PostMapping("/finalizar/{id}")
     public ResponseEntity<?> finalizarReporte(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Map<String, Object> body,
             Authentication authentication) {
 
@@ -146,7 +147,7 @@ public class ReporteController {
         try {
             String email = authentication.getName();
             Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
+            UUID userId = usuario.getId();
             
             return ResponseEntity.ok(
                 reporteService.obtenerReportesDTOParaAgente(email, userId)
@@ -167,7 +168,7 @@ public class ReporteController {
         try {
             String email = authentication.getName();
             Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
+            UUID userId = usuario.getId();
             
             return ResponseEntity.ok(
                 reporteService.obtenerHistorialAgente(email, userId)
@@ -267,7 +268,7 @@ public class ReporteController {
         try {
             String email = authentication.getName();
             Usuario usuario = (Usuario) authentication.getPrincipal();
-            Long userId = usuario.getId();
+            UUID userId = usuario.getId();
             
             return ResponseEntity.ok(
                 reporteService.obtenerEstadisticasCompletas(email, userId, fechaInicio, fechaFin)

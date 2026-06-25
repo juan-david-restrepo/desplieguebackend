@@ -14,13 +14,14 @@ import com.reporteloya.backend.entity.Reporte;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ReporteRepository extends JpaRepository<Reporte, Long> {
+public interface ReporteRepository extends JpaRepository<Reporte, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT r FROM Reporte r WHERE r.id = :id")
-    java.util.Optional<Reporte> findByIdWithLock(@Param("id") Long id);
+    java.util.Optional<Reporte> findByIdWithLock(@Param("id") UUID id);
 
     List<Reporte> findByAgente_Placa(String placa);
 
@@ -31,11 +32,11 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
     List<Reporte> findByAgentePlacaIgnoreCaseAndEstado(String placa, String estado);
 
 
-    List<Reporte> findByUsuario_IdOrderByCreatedAtDesc(Long usuarioId);
+    List<Reporte> findByUsuario_IdOrderByCreatedAtDesc(UUID usuarioId);
 
-    int countByUsuario_Id(Long idUsuario);
+    int countByUsuario_Id(UUID idUsuario);
 
-    List<Reporte> findByUsuario_IdAndEstadoOrderByCreatedAtDesc(Long usuarioId, String estado);
+    List<Reporte> findByUsuario_IdAndEstadoOrderByCreatedAtDesc(UUID usuarioId, String estado);
 
 
     
@@ -133,10 +134,10 @@ public interface ReporteRepository extends JpaRepository<Reporte, Long> {
 
 
     @Query("SELECT COUNT(r) FROM Reporte r WHERE r.usuario.id = :usuarioId")
-    int countByUsuarioId(@Param("usuarioId") Long usuarioId);
+    int countByUsuarioId(@Param("usuarioId") UUID usuarioId);
 
     @Query("SELECT COUNT(r) FROM Reporte r WHERE r.usuario.id = :usuarioId AND r.estado = :estado")
-    int countByUsuarioIdAndEstado(@Param("usuarioId") Long usuarioId, @Param("estado") String estado);
+    int countByUsuarioIdAndEstado(@Param("usuarioId") UUID usuarioId, @Param("estado") String estado);
 
     // Reportes PENDIENTE cuya creación supera el límite de tiempo (para expiración automática)
     List<Reporte> findByEstadoAndCreatedAtBefore(String estado, LocalDateTime fecha);

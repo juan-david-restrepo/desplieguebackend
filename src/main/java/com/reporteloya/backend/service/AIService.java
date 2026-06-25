@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class AIService {
@@ -13,7 +14,7 @@ public class AIService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String aiUrl = "https://backend-ia-8in0.onrender.com/ai/start";
 
-    public Map<String, Object> startConversation(Long userId, String name, String role) {
+    public Map<String, Object> startConversation(UUID userId, String name, String role) {
         AIRequest request = new AIRequest(userId, name, role);
 
         ResponseEntity<Map> response =

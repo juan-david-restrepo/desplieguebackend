@@ -2,14 +2,16 @@ package com.reporteloya.backend.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "password_reset_token")
 public class PasswordResetToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(nullable = false)
     private String email;
@@ -20,8 +22,8 @@ public class PasswordResetToken {
     @Column(name = "expiration_date", nullable = false)
     private LocalDateTime expirationDate;
 
-    @Column(name = "id_usuario", nullable = false)
-    private Long idUsuario;  // ✅ Campo agregado
+    @Column(name = "id_usuario", nullable = false, columnDefinition = "VARCHAR(36)")
+    private UUID idUsuario;
 
     @Column(nullable = false)
     private boolean used = false;
@@ -29,29 +31,27 @@ public class PasswordResetToken {
     public PasswordResetToken() {
     }
 
-    public PasswordResetToken(String email, String token, LocalDateTime expirationDate, Long idUsuario) {
+    public PasswordResetToken(String email, String token, LocalDateTime expirationDate, UUID idUsuario) {
         this.email = email;
         this.token = token;
         this.expirationDate = expirationDate;
-        this.idUsuario = idUsuario; // ✅ Se asigna
+        this.idUsuario = idUsuario;
         this.used = false;
     }
 
-    // Getters y Setters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getEmail() { return email; }
     public String getToken() { return token; }
     public LocalDateTime getExpirationDate() { return expirationDate; }
     public boolean isUsed() { return used; }
-    public Long getIdUsuario() { return idUsuario; } // ✅ getter agregado
+    public UUID getIdUsuario() { return idUsuario; }
 
     public void setEmail(String email) { this.email = email; }
     public void setToken(String token) { this.token = token; }
     public void setExpirationDate(LocalDateTime expirationDate) { this.expirationDate = expirationDate; }
     public void setUsed(boolean used) { this.used = used; }
-    public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; } // ✅ setter agregado
+    public void setIdUsuario(UUID idUsuario) { this.idUsuario = idUsuario; }
 
-    // ⏳ Verificar expiración
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expirationDate);
     }

@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/soporte")
@@ -29,14 +30,14 @@ public class SoporteController {
 
     @GetMapping("/mis-tickets/{id}")
     public ResponseEntity<?> verMiTicket(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             Authentication auth) {
         return soporteService.obtenerTicketConMensajes(id, auth);
     }
 
     @PostMapping("/mis-tickets/{id}/responder")
     public ResponseEntity<?> responderMiTicket(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody ResponderTicketRequest request,
             Authentication auth) {
         return soporteService.agregarMensaje(id, request, auth);
@@ -48,20 +49,20 @@ public class SoporteController {
     }
 
     @GetMapping("/admin/tickets/{id}")
-    public ResponseEntity<?> verTicketAdmin(@PathVariable Long id) {
+    public ResponseEntity<?> verTicketAdmin(@PathVariable UUID id) {
         return soporteService.obtenerTicketAdmin(id);
     }
 
     @PostMapping("/admin/tickets/{id}/responder")
     public ResponseEntity<?> responderComoAdmin(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody ResponderTicketRequest request,
             Authentication auth) {
         return soporteService.responderComoAdmin(id, request, auth);
     }
 
     @PutMapping("/admin/tickets/{id}/cerrar")
-    public ResponseEntity<?> cerrarTicket(@PathVariable Long id) {
+    public ResponseEntity<?> cerrarTicket(@PathVariable UUID id) {
         return soporteService.cerrarTicket(id);
     }
 

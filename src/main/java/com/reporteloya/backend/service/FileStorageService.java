@@ -25,7 +25,7 @@ public class FileStorageService {
         this.cloudinary = cloudinary;
     }
 
-    public String guardarArchivo(MultipartFile file, Long reporteId) throws IOException {
+    public String guardarArchivo(MultipartFile file, UUID reporteId) throws IOException {
 
         if (file.isEmpty()) {
             throw new RuntimeException("Archivo vacío");
@@ -51,7 +51,7 @@ public class FileStorageService {
         return secureUrl;
     }
 
-    public String guardarFotoPerfil(MultipartFile file, Long usuarioId) throws IOException {
+    public String guardarFotoPerfil(MultipartFile file, UUID usuarioId) throws IOException {
 
         if (file.isEmpty()) {
             throw new RuntimeException("Archivo vacío");
@@ -78,7 +78,7 @@ public class FileStorageService {
         return secureUrl;
     }
 
-    public String guardarEvidencia(MultipartFile file, Long reporteId, int indice) throws IOException {
+    public String guardarEvidencia(MultipartFile file, UUID reporteId, int indice) throws IOException {
 
         if (file.isEmpty()) {
             throw new RuntimeException("Archivo vacío");
@@ -104,7 +104,7 @@ public class FileStorageService {
         return secureUrl;
     }
 
-    public String guardarFotoPerfil(byte[] imageBytes, String contentType, Long usuarioId) throws IOException {
+    public String guardarFotoPerfil(byte[] imageBytes, String contentType, UUID usuarioId) throws IOException {
         if (imageBytes == null || imageBytes.length == 0) {
             throw new RuntimeException("Archivo vacío");
         }

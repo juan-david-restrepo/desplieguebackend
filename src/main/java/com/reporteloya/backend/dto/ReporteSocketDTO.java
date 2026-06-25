@@ -1,11 +1,12 @@
 package com.reporteloya.backend.dto;
 
 import lombok.Data;
+import java.util.UUID;
 
 @Data
 public class ReporteSocketDTO {
 
-    private Long id;
+    private UUID id;
     private String tipoInfraccion;
     private String descripcion;
     private String direccion;

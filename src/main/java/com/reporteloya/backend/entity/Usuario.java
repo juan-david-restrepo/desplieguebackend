@@ -1,13 +1,16 @@
 package com.reporteloya.backend.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.reporteloya.backend.security.EncryptedStringConverter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -19,23 +22,32 @@ import java.util.List;
 public class Usuario implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_usuario")
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id_usuario", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
+    private UUID id;
 
     @Column(name = "tipo_documento")
+    @Size(max = 20)
     private String tipoDocumento;
 
     @Column(name = "numero_documento")
+    @Convert(converter = EncryptedStringConverter.class)
+    @Size(max = 255)
     private String numeroDocumento;
 
     @Column(name = "nombre_completo", nullable = false)
+    @NotBlank
+    @Size(max = 100)
     private String nombreCompleto;
 
-    @Column(name = "correo",unique = true, nullable = false)
+    @Column(name = "correo", unique = true, nullable = false)
+    @NotBlank
+    @Email
+    @Size(max = 255)
     private String email;
 
-    @Column(name = "password",nullable = false)
+    @Column(name = "password", nullable = false)
+    @NotBlank
     private String password;
 
     @Enumerated(EnumType.STRING)

@@ -2,6 +2,7 @@ package com.reporteloya.backend.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -39,7 +40,7 @@ public class CiudadanoController {
         return ResponseEntity.ok("Acceso CIUDADANO permitido");
     }
 
-    private Long getUsuarioId() {
+    private UUID getUsuarioId() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         Usuario usuario = (Usuario) authentication.getPrincipal();
         return usuario.getId();
@@ -48,7 +49,7 @@ public class CiudadanoController {
     @GetMapping("/mis-reportes")
     public ResponseEntity<?> misReportes() {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             List<Reporte> reportes = reporteService.obtenerReportesPorUsuario(usuarioId);
             return ResponseEntity.ok(reportes);
         } catch (Exception e) {
@@ -59,7 +60,7 @@ public class CiudadanoController {
     @GetMapping("/mis-reportes/estadisticas")
     public ResponseEntity<?> misReportesEstadisticas() {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             var stats = reporteService.obtenerEstadisticas(usuarioId);
             return ResponseEntity.ok(stats);
         } catch (Exception e) {
@@ -68,9 +69,9 @@ public class CiudadanoController {
     }
 
     @DeleteMapping("/mis-reportes/{id}")
-    public ResponseEntity<?> eliminarReporte(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarReporte(@PathVariable UUID id) {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             reporteService.eliminarReporte(id, usuarioId);
             return ResponseEntity.ok("Reporte eliminado");
         } catch (Exception e) {
@@ -80,7 +81,7 @@ public class CiudadanoController {
 
     @PutMapping("/mis-reportes/{id}")
     public ResponseEntity<?> actualizarReporte(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestParam(required = false) String descripcion,
             @RequestParam(required = false) String direccion,
             @RequestParam(required = false) Double latitud,
@@ -90,7 +91,7 @@ public class CiudadanoController {
             @RequestParam(required = false) String horaIncidente,
             @RequestParam(required = false) String tipoInfraccion) {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             Reporte reporte = reporteService.actualizarReporte(id, usuarioId, descripcion, direccion, 
                     latitud, longitud, placa, fechaIncidente, horaIncidente, tipoInfraccion);
             return ResponseEntity.ok(reporte);
@@ -102,7 +103,7 @@ public class CiudadanoController {
     @GetMapping("/notificaciones")
     public ResponseEntity<?> getNotificaciones() {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             List<Notification> notificaciones = notificationRepository.findUltimas50PorUsuarioId(usuarioId);
             List<NotificacionDTO> dtoList = new ArrayList<>();
             for (Notification n : notificaciones) {
@@ -126,7 +127,7 @@ public class CiudadanoController {
     @GetMapping("/notificaciones/no-leidas")
     public ResponseEntity<?> getNotificacionesNoLeidas() {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             List<Notification> notificaciones = notificationRepository.findNoLeidasPorUsuarioId(usuarioId);
             List<NotificacionDTO> dtoList = new ArrayList<>();
             for (Notification n : notificaciones) {
@@ -148,7 +149,7 @@ public class CiudadanoController {
     }
 
     @PutMapping("/notificaciones/{id}/leida")
-    public ResponseEntity<?> marcarNotificacionLeida(@PathVariable Long id) {
+    public ResponseEntity<?> marcarNotificacionLeida(@PathVariable UUID id) {
         try {
             Notification notificacion = notificationRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
@@ -163,7 +164,7 @@ public class CiudadanoController {
     @PutMapping("/notificaciones/leer-todas")
     public ResponseEntity<?> marcarTodasLeidas() {
         try {
-            Long usuarioId = getUsuarioId();
+            UUID usuarioId = getUsuarioId();
             List<Notification> notificaciones = notificationRepository.findNoLeidasPorUsuarioId(usuarioId);
             for (Notification n : notificaciones) {
                 n.setLeida(true);

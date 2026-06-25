@@ -1,5 +1,6 @@
 package com.reporteloya.backend.controller;
 
+import java.util.UUID;
 import com.reporteloya.backend.dto.AuthResponse;
 import com.reporteloya.backend.dto.LoginRequest;
 import com.reporteloya.backend.dto.RegisterRequest;
@@ -61,7 +62,7 @@ public class AuthController {
             // 🔄 Sincronizar nuevo usuario con Chat AI
             if (result.containsKey("user")) {
                 Map<String, Object> userData = (Map<String, Object>) result.get("user");
-                Long userId = ((Number) userData.get("id")).longValue();
+                UUID userId = UUID.fromString(userData.get("id").toString());
                 String email = (String) userData.get("email");
                 String nombreCompleto = (String) userData.get("nombreCompleto");
                 

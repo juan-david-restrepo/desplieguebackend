@@ -1,5 +1,6 @@
 package com.reporteloya.backend.controller;
 
+import java.util.UUID;
 import com.reporteloya.backend.dto.EstadoAgenteDTO;
 import com.reporteloya.backend.dto.PerfilAgenteDTO;
 import com.reporteloya.backend.dto.NotificacionDTO;
@@ -102,7 +103,7 @@ public class AgenteController {
 
     @PostMapping("/tareas/{id}/estado")
     public ResponseEntity<?> actualizarEstadoTarea(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody Map<String,String> body){
 
         String nuevoEstado = body.get("estado");
@@ -302,7 +303,7 @@ public class AgenteController {
     }
 
     @PutMapping("/notificaciones/{id}/leida")
-    public ResponseEntity<?> marcarNotificacionLeida(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<?> marcarNotificacionLeida(@PathVariable UUID id, Authentication authentication) {
         String email = authentication.getName();
         return agenteService.buscarPorEmail(email)
             .map(agente -> {
