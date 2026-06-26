@@ -37,6 +37,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final RecaptchaService recaptchaService;
 
     @Value("${app.verification.url:https://frontend-eight-beta-69.vercel.app/verificar-correo}")
     private String verificationUrl;
@@ -45,6 +46,7 @@ public class AuthService {
 
     @Transactional
     public Map<String, Object> register(RegisterRequest request) {
+        recaptchaService.verifyToken(request.getRecaptchaToken());
         validarRegistro(request);
 
         if (usuarioRepository.existsByEmail(request.getEmail())) {
@@ -153,6 +155,7 @@ public class AuthService {
     }
 
     public AuthResult login(LoginRequest request) {
+        recaptchaService.verifyToken(request.getRecaptchaToken());
         String email = request.getEmail();
         
         if (email == null || email.isBlank()) {
