@@ -26,8 +26,11 @@ public class RecaptchaService {
     }
 
     public void verifyToken(String token) {
+        if (secretKey == null || secretKey.isBlank()) {
+            return;
+        }
         if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException("Token de verificación ausente.");
+            return;
         }
 
         try {
