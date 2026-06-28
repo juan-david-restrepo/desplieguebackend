@@ -56,11 +56,17 @@ public class ReporteController {
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
         log.info("Creando reporte para usuario {}", usuario.getId());
-        Reporte reporte = reporteService.crearReporte(
-                descripcion, direccion, latitud, longitud,
-                placa, fechaIncidente, horaIncidente,
-                tipoInfraccion, archivos, usuario);
-        return ResponseEntity.ok(reporte);
+        try {
+            Reporte reporte = reporteService.crearReporte(
+                    descripcion, direccion, latitud, longitud,
+                    placa, fechaIncidente, horaIncidente,
+                    tipoInfraccion, archivos, usuario);
+            return ResponseEntity.ok(reporte);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(429).body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 
     // ================================

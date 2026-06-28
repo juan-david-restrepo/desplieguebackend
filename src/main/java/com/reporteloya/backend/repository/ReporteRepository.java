@@ -139,6 +139,9 @@ public interface ReporteRepository extends JpaRepository<Reporte, UUID> {
     @Query("SELECT COUNT(r) FROM Reporte r WHERE r.usuario.id = :usuarioId AND r.estado = :estado")
     int countByUsuarioIdAndEstado(@Param("usuarioId") UUID usuarioId, @Param("estado") String estado);
 
+    @Query("SELECT COUNT(r) FROM Reporte r WHERE r.usuario.id = :usuarioId AND r.createdAt >= :inicio AND r.createdAt < :fin")
+    int countByUsuarioIdAndCreatedAtBetween(@Param("usuarioId") UUID usuarioId, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin);
+
     // Reportes PENDIENTE cuya creación supera el límite de tiempo (para expiración automática)
     List<Reporte> findByEstadoAndCreatedAtBefore(String estado, LocalDateTime fecha);
 

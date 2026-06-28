@@ -99,6 +99,13 @@ public class ReporteService {
             List<MultipartFile> archivos,
             Usuario usuario) {
 
+        LocalDateTime inicioDia = java.time.LocalDate.now().atStartOfDay();
+        LocalDateTime finDia = inicioDia.plusDays(1);
+        int reportesHoy = reporteRepository.countByUsuarioIdAndCreatedAtBetween(usuario.getId(), inicioDia, finDia);
+        if (reportesHoy >= 4) {
+            throw new IllegalArgumentException("Has alcanzado el límite de 4 reportes por día. Puedes enviar más mañana.");
+        }
+
         if (archivos == null || archivos.isEmpty()) {
             throw new RuntimeException("Debe subir al menos una imagen");
         }
