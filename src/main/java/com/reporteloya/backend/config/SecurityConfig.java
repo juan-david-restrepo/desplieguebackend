@@ -120,6 +120,10 @@ public class SecurityConfig {
                 configuration.setAllowedOrigins(List.of(
                         "https://frontend-eight-beta-69.vercel.app",
                         "https://frontend-eight-beta-69.vercel.app/",
+                        "https://www.report-elo.com",
+                        "https://www.report-elo.com/",
+                        "https://report-elo.com",
+                        "https://report-elo.com/",
                         "http://localhost:4200",
                         "http://localhost:4200/"
                 ));
