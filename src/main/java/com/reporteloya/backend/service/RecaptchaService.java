@@ -49,20 +49,22 @@ public class RecaptchaService {
 
             String responseBody = httpResponse.body();
             if (responseBody == null || !responseBody.contains("\"success\": true")) {
-                System.err.println("[reCAPTCHA] Fallo de verificación (dominio no registrado?): " + responseBody);
-                return;
+                throw new IllegalArgumentException("Verificación de seguridad fallida.");
             }
 
             double score = extractScore(responseBody);
             if (score < scoreThreshold) {
-                System.err.println("[reCAPTCHA] Score bajo: " + score);
-                return;
+                throw new IllegalArgumentException(
+                        "No se pudo verificar que eres humano. Intenta de nuevo."
+                );
             }
 
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("[reCAPTCHA] Error de red al verificar: " + e.getMessage());
+            throw new IllegalArgumentException(
+                    "Error al verificar la seguridad. Intenta de nuevo."
+            );
         }
     }
 
