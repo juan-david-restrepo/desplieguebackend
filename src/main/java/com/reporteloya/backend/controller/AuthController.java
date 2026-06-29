@@ -1,6 +1,5 @@
 package com.reporteloya.backend.controller;
 
-import java.util.UUID;
 import com.reporteloya.backend.dto.AuthResponse;
 import com.reporteloya.backend.dto.LoginRequest;
 import com.reporteloya.backend.dto.RegisterRequest;
@@ -58,23 +57,6 @@ public class AuthController {
         }
         try {
             Map<String, Object> result = authService.register(request);
-
-            // 🔄 Sincronizar nuevo usuario con Chat AI
-            if (result.containsKey("user")) {
-                Map<String, Object> userData = (Map<String, Object>) result.get("user");
-                UUID userId = UUID.fromString(userData.get("id").toString());
-                String email = (String) userData.get("email");
-                String nombreCompleto = (String) userData.get("nombreCompleto");
-                
-                chatAISyncService.syncUser(
-                    userId,
-                    email,
-                    nombreCompleto,
-                    "CIUDADANO",
-                    (String) userData.get("tipoDocumento"),
-                    (String) userData.get("numeroDocumento")
-                );
-            }
 
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
 
@@ -209,16 +191,6 @@ public class AuthController {
         }
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
-
-        // 🔄 Sincronizar usuario con Chat AI si no existe
-        chatAISyncService.syncUser(
-            usuario.getId(),
-            usuario.getEmail(),
-            usuario.getNombreCompleto(),
-            usuario.getRole().name(),
-            usuario.getTipoDocumento(),
-            usuario.getNumeroDocumento()
-        );
 
         return ResponseEntity.ok(
                 AuthResponse.builder()

@@ -2,6 +2,7 @@ package com.reporteloya.backend.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -19,32 +20,37 @@ import java.util.UUID;
 @Repository
 public interface ReporteRepository extends JpaRepository<Reporte, UUID> {
 
+    @EntityGraph(attributePaths = {"agente", "agenteCompanero"})
+    Page<Reporte> findAll(Pageable pageable);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT r FROM Reporte r WHERE r.id = :id")
     java.util.Optional<Reporte> findByIdWithLock(@Param("id") UUID id);
 
     List<Reporte> findByAgente_Placa(String placa);
 
-    List<Reporte> findByEstado(String estado);
+    @Query("SELECT r FROM Reporte r LEFT JOIN FETCH r.agente LEFT JOIN FETCH r.agenteCompanero WHERE r.estado = :estado")
+    List<Reporte> findByEstado(@Param("estado") String estado);
 
+    @EntityGraph(attributePaths = {"agente", "agenteCompanero"})
     Page<Reporte> findByEstado(String estado, Pageable pageable);
 
-    List<Reporte> findByAgentePlacaIgnoreCaseAndEstado(String placa, String estado);
+    @Query("SELECT r FROM Reporte r LEFT JOIN FETCH r.agente LEFT JOIN FETCH r.agenteCompanero WHERE r.agente.placa = :placa AND r.estado = :estado")
+    List<Reporte> findByAgentePlacaIgnoreCaseAndEstado(@Param("placa") String placa, @Param("estado") String estado);
 
-
-    List<Reporte> findByUsuario_IdOrderByCreatedAtDesc(UUID usuarioId);
+    @Query("SELECT r FROM Reporte r LEFT JOIN FETCH r.agente LEFT JOIN FETCH r.agenteCompanero WHERE r.usuario.id = :usuarioId ORDER BY r.createdAt DESC")
+    List<Reporte> findByUsuario_IdOrderByCreatedAtDesc(@Param("usuarioId") UUID usuarioId);
 
     int countByUsuario_Id(UUID idUsuario);
 
-    List<Reporte> findByUsuario_IdAndEstadoOrderByCreatedAtDesc(UUID usuarioId, String estado);
+    @Query("SELECT r FROM Reporte r LEFT JOIN FETCH r.agente LEFT JOIN FETCH r.agenteCompanero WHERE r.usuario.id = :usuarioId AND r.estado = :estado ORDER BY r.createdAt DESC")
+    List<Reporte> findByUsuario_IdAndEstadoOrderByCreatedAtDesc(@Param("usuarioId") UUID usuarioId, @Param("estado") String estado);
 
-
-    
-
+    @EntityGraph(attributePaths = {"agente", "agenteCompanero"})
     Page<Reporte> findByPrioridad(Prioridad prioridad, Pageable pageable);
 
-    // LEFT JOIN para que no explote cuando agenteCompanero es NULL
     @Query("SELECT r FROM Reporte r " +
+           "LEFT JOIN FETCH r.agente " +
            "LEFT JOIN r.agenteCompanero ac " +
            "WHERE r.estado = 'EN_PROCESO' " +
            "AND (r.agente.placa = :placa OR ac.placa = :placa)")
@@ -52,6 +58,7 @@ public interface ReporteRepository extends JpaRepository<Reporte, UUID> {
 
     // Historial: reportes FINALIZADOS o RECHAZADOS donde el agente participó
     @Query("SELECT r FROM Reporte r " +
+           "LEFT JOIN FETCH r.agente " +
            "LEFT JOIN r.agenteCompanero ac " +
            "WHERE (r.estado = 'FINALIZADO' OR r.estado = 'RECHAZADO') " +
            "AND (r.agente.placa = :placa OR ac.placa = :placa) " +

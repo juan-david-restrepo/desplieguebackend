@@ -42,7 +42,9 @@ public class FileStorageService {
                 ObjectUtils.asMap(
                         "public_id", publicId,
                         "folder", "reporteloya",
-                        "resource_type", "image"
+                        "resource_type", "image",
+                        "quality", "auto",
+                        "fetch_format", "auto"
                 )
         );
 

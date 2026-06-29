@@ -12,7 +12,9 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "evidencia")
+@Table(name = "evidencia", indexes = {
+    @Index(name = "idx_evidencia_reporte", columnList = "reporte_id")
+})
 public class Evidencia {
 
     @Id
@@ -23,7 +25,7 @@ public class Evidencia {
     private String tipo;
     private String archivo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporte_id")
     @JsonIgnore
     private Reporte reporte;

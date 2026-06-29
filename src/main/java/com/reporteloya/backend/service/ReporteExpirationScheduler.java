@@ -38,11 +38,11 @@ public class ReporteExpirationScheduler {
 
         if (vencidos.isEmpty()) return;
 
-        for (Reporte reporte : vencidos) {
-            reporte.setEstado("EXPIRADO");
-            reporteRepository.save(reporte);
-            messagingTemplate.convertAndSend("/topic/reportes", reporteService.convertirADTO(reporte));
-        }
+        vencidos.forEach(reporte -> reporte.setEstado("EXPIRADO"));
+        reporteRepository.saveAll(vencidos);
+        vencidos.forEach(reporte ->
+            messagingTemplate.convertAndSend("/topic/reportes", reporteService.convertirADTO(reporte))
+        );
 
         logger.info("[Scheduler] Reportes expirados por inactividad de 24h: " + vencidos.size());
     }

@@ -165,11 +165,7 @@ public class CiudadanoController {
     public ResponseEntity<?> marcarTodasLeidas() {
         try {
             UUID usuarioId = getUsuarioId();
-            List<Notification> notificaciones = notificationRepository.findNoLeidasPorUsuarioId(usuarioId);
-            for (Notification n : notificaciones) {
-                n.setLeida(true);
-                notificationRepository.save(n);
-            }
+            notificationRepository.marcarTodasLeidasPorUsuarioId(usuarioId);
             return ResponseEntity.ok("Todas las notificaciones marcadas como leídas");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

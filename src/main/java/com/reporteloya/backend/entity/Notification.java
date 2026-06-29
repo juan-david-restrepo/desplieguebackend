@@ -6,7 +6,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notificaciones")
+@Table(name = "notificaciones", indexes = {
+    @Index(name = "idx_notif_agente", columnList = "agente_id"),
+    @Index(name = "idx_notif_usuario", columnList = "usuario_id"),
+    @Index(name = "idx_notif_leida", columnList = "leida")
+})
 @Data
 public class Notification {
 

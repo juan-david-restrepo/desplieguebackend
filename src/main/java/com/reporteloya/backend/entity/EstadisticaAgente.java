@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
@@ -19,7 +21,11 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "estadistica_agente")
+@Table(name = "estadistica_agente", indexes = {
+    @Index(name = "idx_estadistica_agente", columnList = "id_agente"),
+    @Index(name = "idx_estadistica_periodo", columnList = "periodo"),
+    @Index(name = "idx_estadistica_agente_periodo", columnList = "id_agente, periodo")
+})
 public class EstadisticaAgente {
 
     @Id
@@ -27,7 +33,7 @@ public class EstadisticaAgente {
     @Column(name = "id_estadistica", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agente")
     private Agentes agente;
 

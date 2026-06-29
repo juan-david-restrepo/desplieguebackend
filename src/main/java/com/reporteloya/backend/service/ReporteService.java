@@ -2,6 +2,8 @@ package com.reporteloya.backend.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -86,6 +88,7 @@ public class ReporteService {
     // ================================
     // CREAR REPORTE
     // ================================
+    @CacheEvict(value = {"estadisticasAdmin", "estadisticasDashboard", "estadisticasCompletas"}, allEntries = true)
     @Transactional
     public Reporte crearReporte(
             String descripcion,
@@ -114,27 +117,29 @@ public class ReporteService {
         String placaDetectadaIA = null;
         String motivoRechazo = null;
 
-        for (MultipartFile archivo : archivos) {
-            if (archivo.getContentType() == null ||
-                    !archivo.getContentType().startsWith("image")) {
-                continue;
-            }
-            try {
-                ImageValidationResult validationResult = imageValidationService.validarImagen(archivo, tipoInfraccion);
-                if (validationResult.isValida()) {
-                    imagenValida = true;
-                    if (validationResult.getPlacaDetectada() != null &&
-                        (placa == null || placa.isBlank())) {
-                        placaDetectadaIA = validationResult.getPlacaDetectada();
-                        log.info("Placa detectada por IA: {}", placaDetectadaIA);
-                    }
-                    break;
-                } else {
-                    motivoRechazo = validationResult.getMotivoRechazo();
-                    log.info("Imagen rechazada: {}", motivoRechazo);
+        List<ImageValidationResult> resultados = archivos.parallelStream()
+            .filter(f -> f.getContentType() != null && f.getContentType().startsWith("image"))
+            .map(archivo -> {
+                try {
+                    return imageValidationService.validarImagen(archivo, tipoInfraccion);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error validando imagen con IA: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                throw new RuntimeException("Error validando imagen con IA: " + e.getMessage());
+            })
+            .toList();
+
+        for (ImageValidationResult validationResult : resultados) {
+            if (validationResult.isValida()) {
+                imagenValida = true;
+                if (validationResult.getPlacaDetectada() != null &&
+                    (placa == null || placa.isBlank())) {
+                    placaDetectadaIA = validationResult.getPlacaDetectada();
+                    log.info("Placa detectada por IA: {}", placaDetectadaIA);
+                }
+                break;
+            } else {
+                motivoRechazo = validationResult.getMotivoRechazo();
+                log.info("Imagen rechazada: {}", motivoRechazo);
             }
         }
 
@@ -195,18 +200,20 @@ public class ReporteService {
     private void guardarEvidencias(List<MultipartFile> archivos, Reporte reporte) {
         if (archivos == null || archivos.isEmpty()) return;
 
-        for (MultipartFile archivo : archivos) {
+        List<Evidencia> evidencias = archivos.parallelStream().map(archivo -> {
             try {
                 String url = fileStorageService.guardarArchivo(archivo, reporte.getId());
                 Evidencia evidencia = new Evidencia();
                 evidencia.setTipo(archivo.getContentType());
                 evidencia.setArchivo(url);
                 evidencia.setReporte(reporte);
-                evidenciaRepository.save(evidencia);
+                return evidencia;
             } catch (IOException e) {
                 throw new RuntimeException("Error al guardar archivo: " + e.getMessage(), e);
             }
-        }
+        }).toList();
+
+        evidenciaRepository.saveAll(evidencias);
     }
 
     // ================================
@@ -313,6 +320,7 @@ public class ReporteService {
     // ================================
     // AGENTE TOMA REPORTE (SOLO)
     // ================================
+    @CacheEvict(value = {"estadisticasAdmin", "estadisticasDashboard", "estadisticasCompletas"}, allEntries = true)
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Reporte tomarReporte(UUID reporteId, String emailAgente, UUID userId) {
 
@@ -354,6 +362,7 @@ public class ReporteService {
     // ================================
     // AGENTE TOMA REPORTE (ACOMPAÑADO)
     // ================================
+    @CacheEvict(value = {"estadisticasAdmin", "estadisticasDashboard", "estadisticasCompletas"}, allEntries = true)
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public Reporte tomarReporteConCompanero(UUID reporteId, String emailAgente, String placaCompanero, UUID userId) {
 
@@ -413,6 +422,7 @@ public class ReporteService {
     // RECHAZAR REPORTE
     // Se guarda en historial con estado RECHAZADO (sin resumen).
     // ================================
+    @CacheEvict(value = {"estadisticasAdmin", "estadisticasDashboard", "estadisticasCompletas"}, allEntries = true)
     @Transactional
     public Reporte rechazarReporte(UUID reporteId, String emailAgente, UUID userId, String motivo) {
 
@@ -448,6 +458,7 @@ public class ReporteService {
     // ================================
     // FINALIZAR REPORTE
     // ================================
+    @CacheEvict(value = {"estadisticasAdmin", "estadisticasDashboard", "estadisticasCompletas"}, allEntries = true)
     @Transactional
     public Reporte finalizarReporte(UUID reporteId, String emailAgente, String resumen, UUID userId, Boolean huboComparendo) {
 
@@ -613,6 +624,7 @@ public class ReporteService {
     // ================================
     // ESTADÍSTICAS PARA DASHBOARD DEL AGENTE
     // ================================
+    @Cacheable(value = "estadisticasDashboard", key = "#fechaInicio + ':' + #fechaFin")
     public EstadisticasDashboardDTO obtenerEstadisticasDashboard(String fechaInicio, String fechaFin) {
         
         LocalDateTime inicio;
@@ -679,26 +691,31 @@ public class ReporteService {
         int diaSemana = fecha.getDayOfWeek().getValue();
         int hora = fecha.getHour();
 
-        // Guardar estadísticas para el agente principal
+        List<EstadisticaAgente> stats = new ArrayList<>();
+
         if (reporte.getAgente() != null) {
             String placa = reporte.getAgente().getPlaca();
-            guardarStat(placa, "SEMANA", getEtiquetaDiaSemana(diaSemana), anio, mes, diaSemana, null, tipo);
-            guardarStat(placa, "ANIO", getEtiquetaMes(mes), anio, mes, null, null, tipo);
-            guardarStat(placa, "DIA", getEtiquetaFranjaHoraria(hora), anio, mes, diaSemana, hora, tipo);
+            stats.add(crearStat(placa, "SEMANA", getEtiquetaDiaSemana(diaSemana), anio, mes, diaSemana, null, tipo));
+            stats.add(crearStat(placa, "ANIO", getEtiquetaMes(mes), anio, mes, null, null, tipo));
+            stats.add(crearStat(placa, "DIA", getEtiquetaFranjaHoraria(hora), anio, mes, diaSemana, hora, tipo));
         }
 
-        // Guardar estadísticas para el agente compañero si existe (solo para FINALIZADO)
         if (reporte.getAgenteCompanero() != null && "FINALIZADO".equals(tipo)) {
             String placaCompanero = reporte.getAgenteCompanero().getPlaca();
-            guardarStat(placaCompanero, "SEMANA", getEtiquetaDiaSemana(diaSemana), anio, mes, diaSemana, null, tipo);
-            guardarStat(placaCompanero, "ANIO", getEtiquetaMes(mes), anio, mes, null, null, tipo);
-            guardarStat(placaCompanero, "DIA", getEtiquetaFranjaHoraria(hora), anio, mes, diaSemana, hora, tipo);
+            stats.add(crearStat(placaCompanero, "SEMANA", getEtiquetaDiaSemana(diaSemana), anio, mes, diaSemana, null, tipo));
+            stats.add(crearStat(placaCompanero, "ANIO", getEtiquetaMes(mes), anio, mes, null, null, tipo));
+            stats.add(crearStat(placaCompanero, "DIA", getEtiquetaFranjaHoraria(hora), anio, mes, diaSemana, hora, tipo));
+        }
+
+        stats.removeIf(s -> s == null);
+        if (!stats.isEmpty()) {
+            estadisticaAgenteRepository.saveAll(stats);
         }
     }
 
-    private void guardarStat(String placa, String periodo, String etiqueta, Integer anio, Integer mes, Integer diaSemana, Integer hora, String tipo) {
+    private EstadisticaAgente crearStat(String placa, String periodo, String etiqueta, Integer anio, Integer mes, Integer diaSemana, Integer hora, String tipo) {
         Agentes agente = agenteRepository.findByPlacaIgnoreCase(placa).orElse(null);
-        if (agente == null) return;
+        if (agente == null) return null;
 
         EstadisticaAgente stat = new EstadisticaAgente();
         stat.setAgente(agente);
@@ -711,7 +728,7 @@ public class ReporteService {
         stat.setHoraDia(hora);
         stat.setTipo(tipo);
 
-        estadisticaAgenteRepository.save(stat);
+        return stat;
     }
 
     private String getEtiquetaDiaSemana(int diaSemana) {
@@ -755,6 +772,7 @@ public class ReporteService {
     // ================================
     // OBTENER ESTADÍSTICAS COMPLETAS (TARJETAS + GRÁFICAS)
     // ================================
+    @Cacheable(value = "estadisticasCompletas", key = "#userId + ':' + #fechaInicio + ':' + #fechaFin")
     public EstadisticasCompletasDTO obtenerEstadisticasCompletas(String emailAgente, UUID userId, String fechaInicio, String fechaFin) {
         Agentes agente = agenteRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Agente no encontrado con ID: " + userId));
@@ -825,6 +843,7 @@ public class ReporteService {
     // ================================
     // ESTADÍSTICAS GLOBALES PARA ADMIN
     // ================================
+    @Cacheable("estadisticasAdmin")
     public AdminDashboardDTO obtenerEstadisticasAdmin() {
         LocalDate hoy = LocalDate.now();
         LocalDateTime inicioDia = hoy.atStartOfDay();

@@ -159,8 +159,6 @@ public class SoporteService {
 
         notificationService.notifyTicketRespondido(ticket, request.getContenido());
 
-        messagingTemplate.convertAndSend("/topic/soporte/nuevos", ticketDTO);
-
         return ResponseEntity.ok(convertirAMensajeDTO(mensaje));
     }
 

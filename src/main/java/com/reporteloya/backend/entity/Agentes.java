@@ -7,7 +7,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
-@Table(name = "agentes")
+@Table(name = "agentes", indexes = {
+    @Index(name = "idx_agentes_placa", columnList = "placa", unique = true),
+    @Index(name = "idx_agentes_email", columnList = "email"),
+    @Index(name = "idx_agentes_estado", columnList = "estado")
+})
 @Data
 public class Agentes extends Usuario {
 

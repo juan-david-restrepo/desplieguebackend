@@ -107,6 +107,12 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("Token de verificación inválido."));
 
         if (verificationToken.isUsed()) {
+            Usuario usuario = usuarioRepository.findById(verificationToken.getIdUsuario())
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado."));
+            if (usuario.isEmailVerificado()) {
+                String jwtToken = jwtService.generateTokenWithRole(usuario, usuario.getRole());
+                return new AuthResult(jwtToken, usuario);
+            }
             throw new IllegalArgumentException("El token ya ha sido utilizado.");
         }
 
@@ -267,9 +273,8 @@ public class AuthService {
     @Transactional
     public void deleteUnverifiedUsers() {
         LocalDateTime expirationDate = LocalDateTime.now();
-        var expiredTokens = emailVerificationRepository.findAll().stream()
-                .filter(t -> t.isExpired() && !t.isUsed())
-                .toList();
+        var expiredTokens = emailVerificationRepository
+                .findByExpirationDateBeforeAndUsedFalse(expirationDate);
 
         for (var token : expiredTokens) {
             usuarioRepository.deleteById(token.getIdUsuario());

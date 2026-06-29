@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ticket_soporte")
+@Table(name = "ticket_soporte", indexes = {
+    @Index(name = "idx_ticket_usuario", columnList = "usuario_id"),
+    @Index(name = "idx_ticket_estado", columnList = "estado")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

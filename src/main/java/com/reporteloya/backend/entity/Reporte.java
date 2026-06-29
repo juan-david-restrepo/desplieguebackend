@@ -8,7 +8,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,6 +23,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.CascadeType;
+import org.hibernate.annotations.BatchSize;
 import java.util.List;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -31,7 +34,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Getter
 @Setter
-@Table(name = "reporte")
+@Table(name = "reporte", indexes = {
+    @Index(name = "idx_reporte_estado", columnList = "estado"),
+    @Index(name = "idx_reporte_created_at", columnList = "created_at"),
+    @Index(name = "idx_reporte_prioridad", columnList = "prioridad"),
+    @Index(name = "idx_reporte_placa", columnList = "placa"),
+    @Index(name = "idx_reporte_fecha_finalizado", columnList = "fechaFinalizado"),
+    @Index(name = "idx_reporte_fecha_rechazado", columnList = "fechaRechazado"),
+    @Index(name = "idx_reporte_usuario", columnList = "id_usuario"),
+    @Index(name = "idx_reporte_agente", columnList = "id_agente")
+})
 public class Reporte {
 
     @Id
@@ -39,17 +51,17 @@ public class Reporte {
     @Column(name = "id_reporte", columnDefinition = "VARCHAR(36)", updatable = false, nullable = false)
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario")
     @JsonIgnore
     private Usuario usuario;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agente")
     @JsonIgnoreProperties({"reportes", "listaTareas", "password", "email", "rol", "nombreCompleto"})
     private Agentes agente;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_agente_companero")
     @JsonIgnoreProperties({"reportes", "listaTareas", "password", "email", "rol", "nombreCompleto"})
     private Agentes agenteCompanero;
@@ -81,6 +93,7 @@ public class Reporte {
     private LocalTime horaIncidente;
 
     @OneToMany(mappedBy = "reporte", cascade = CascadeType.ALL)
+    @BatchSize(size = 50)
     @JsonIgnore
     private List<Evidencia> evidencias;
 

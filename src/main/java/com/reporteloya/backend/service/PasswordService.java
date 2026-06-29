@@ -6,6 +6,7 @@ import com.reporteloya.backend.repository.TokenRepository;
 import com.reporteloya.backend.repository.UsuarioRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,9 @@ public class PasswordService {
     private final TokenRepository tokenRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.password.reset.url:https://www.report-elo.com/password}")
+    private String passwordResetUrl;
 
     // 🛡 Control de intentos por IP
     private final ConcurrentHashMap<String, AtomicInteger> requestCounts = new ConcurrentHashMap<>();
@@ -64,7 +68,7 @@ public class PasswordService {
                 tokenRepository.save(resetToken);
 
                 // Construir enlace y enviar correo
-                String enlace = "https://frontend-eight-beta-69.vercel.app/password?token=" + tokenString;
+                String enlace = passwordResetUrl + "?token=" + tokenString;
                 emailService.enviarCorreoRecuperacion(email, enlace);
 
             } catch (Exception e) {

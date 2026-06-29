@@ -33,7 +33,7 @@ public class EmailService {
                 <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
                     <div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                         <div style="text-align:center; margin-bottom:20px;">
-                            <img src="https://res.cloudinary.com/drsvslvlg/image/upload/f_auto,q_auto/LogoNuevo2_cepyj6" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
+                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
                         </div>
                         <h2 style="color:#2563eb; text-align:center;">Recuperación de contraseña</h2>
                         <p>Hola,</p>
@@ -43,7 +43,7 @@ public class EmailService {
                                Restablecer contraseña
                             </a>
                         </div>
-                        <p style="font-size:14px; color:#555;">Este enlace expirará en 60 minutos.</p>
+                        <p style="font-size:14px; color:#555;">Este enlace expirará en 15 minutos.</p>
                         <hr style="margin:25px 0;">
                         <p style="font-size:12px; color:#888;">Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
                         <p style="font-size:12px; color:#888;">© 2026 Repórtelo Ya</p>
@@ -61,7 +61,7 @@ public class EmailService {
                 <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
                     <div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                         <div style="text-align:center; margin-bottom:20px;">
-                            <img src="https://res.cloudinary.com/drsvslvlg/image/upload/f_auto,q_auto/LogoNuevo2_cepyj6" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
+                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
                         </div>
                         <h2 style="color:#2563eb; text-align:center;">Verifica tu correo electrónico</h2>
                         <p>Hola,</p>
