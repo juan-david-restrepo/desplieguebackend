@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Year;
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +29,16 @@ public class EmailService {
 
     @Async
     public void enviarCorreoRecuperacion(String destinatario, String enlace) {
-        String subject = "Recupera tu contraseña - RepórteloYa";
+        String subject = "Recupera tu contraseña - Repórtelo!";
         String html = """
                 <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
                     <div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                         <div style="text-align:center; margin-bottom:20px;">
-                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
+                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo!" style="width:120px; height:auto; display:block; margin:auto;">
                         </div>
                         <h2 style="color:#2563eb; text-align:center;">Recuperación de contraseña</h2>
                         <p>Hola,</p>
-                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Repórtelo Ya.</p>
+                        <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en Repórtelo!.</p>
                         <div style="text-align:center; margin:30px 0;">
                             <a href="%s" style="background-color:#2563eb; color:white; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
                                Restablecer contraseña
@@ -46,26 +47,27 @@ public class EmailService {
                         <p style="font-size:14px; color:#555;">Este enlace expirará en 15 minutos.</p>
                         <hr style="margin:25px 0;">
                         <p style="font-size:12px; color:#888;">Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
-                        <p style="font-size:12px; color:#888;">© 2026 Repórtelo Ya</p>
+                        <p style="font-size:12px; color:#888;">Gracias por usar Repórtelo!.</p>
+                        <p style="font-size:12px; color:#888;">© %d Repórtelo!. Todos los derechos reservados.</p>
                     </div>
                 </div>
-                """.formatted(enlace);
+                """.formatted(enlace, Year.now().getValue());
 
         enviar(destinatario, subject, html);
     }
 
     @Async
     public void enviarCorreoVerificacion(String destinatario, String enlace) {
-        String subject = "Verifica tu correo electrónico - RepórteloYa";
+        String subject = "Verifica tu correo electrónico - Repórtelo!";
         String html = """
                 <div style="font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;">
                     <div style="max-width:600px; margin:auto; background:white; padding:30px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
                         <div style="text-align:center; margin-bottom:20px;">
-                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo Ya" style="width:120px; height:auto; display:block; margin:auto;">
+                            <img src="https://www.report-elo.com/assets/images/reportelo.png" alt="Repórtelo!" style="width:120px; height:auto; display:block; margin:auto;">
                         </div>
                         <h2 style="color:#2563eb; text-align:center;">Verifica tu correo electrónico</h2>
                         <p>Hola,</p>
-                        <p>Gracias por registrarte en Repórtelo Ya. Haz clic en el botón para verificar tu cuenta:</p>
+                        <p>Gracias por registrarte en Repórtelo!. Haz clic en el botón para verificar tu cuenta:</p>
                         <div style="text-align:center; margin:30px 0;">
                             <a href="%s" style="background-color:#2563eb; color:white; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
                                Verificar correo electrónico
@@ -74,10 +76,11 @@ public class EmailService {
                         <p style="font-size:14px; color:#555;">Este enlace expirará en 60 minutos.</p>
                         <hr style="margin:25px 0;">
                         <p style="font-size:12px; color:#888;">Si no creaste esta cuenta, puedes ignorar este mensaje.</p>
-                        <p style="font-size:12px; color:#888;">© 2026 Repórtelo Ya</p>
+                        <p style="font-size:12px; color:#888;">Gracias por usar Repórtelo!.</p>
+                        <p style="font-size:12px; color:#888;">© %d Repórtelo!. Todos los derechos reservados.</p>
                     </div>
                 </div>
-                """.formatted(enlace);
+                """.formatted(enlace, Year.now().getValue());
 
         enviar(destinatario, subject, html);
     }
@@ -94,7 +97,7 @@ public class EmailService {
             headers.set("api-key", apiKey);
 
             Map<String, Object> body = Map.of(
-                "sender", Map.of("name", "RepórteloYa", "email", fromEmail),
+                "sender", Map.of("name", "Repórtelo!", "email", fromEmail),
                 "to", List.of(Map.of("email", destinatario)),
                 "subject", subject,
                 "htmlContent", html

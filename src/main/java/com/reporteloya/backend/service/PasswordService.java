@@ -1,6 +1,7 @@
 package com.reporteloya.backend.service;
 
 import com.reporteloya.backend.dto.ResetPasswordRequest;
+import com.reporteloya.backend.dto.ValidarTokenResponse;
 import com.reporteloya.backend.entity.PasswordResetToken;
 import com.reporteloya.backend.repository.TokenRepository;
 import com.reporteloya.backend.repository.UsuarioRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,6 +118,26 @@ public class PasswordService {
             }).orElse(false);
 
         }).orElse(false);
+    }
+
+    /**
+     * 🔐 Validar si un token sigue siendo válido (no expirado, no usado)
+     * Devuelve los segundos restantes para que el frontend sincronice el cronómetro
+     */
+    public ValidarTokenResponse validarToken(String token) {
+        return tokenRepository.findByToken(token)
+            .map(t -> {
+                if (t.isUsed()) {
+                    return new ValidarTokenResponse(false, "usado", null);
+                }
+                if (t.isExpired()) {
+                    tokenRepository.delete(t);
+                    return new ValidarTokenResponse(false, "expirado", null);
+                }
+                long segundos = Duration.between(LocalDateTime.now(), t.getExpirationDate()).getSeconds();
+                return new ValidarTokenResponse(true, null, Math.max(segundos, 0));
+            })
+            .orElse(new ValidarTokenResponse(false, "invalido", null));
     }
 
     /**

@@ -2,6 +2,7 @@ package com.reporteloya.backend.controller;
 
 import com.reporteloya.backend.dto.RecuperarRequest;
 import com.reporteloya.backend.dto.ResetPasswordRequest;
+import com.reporteloya.backend.dto.ValidarTokenResponse;
 import com.reporteloya.backend.service.PasswordService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +46,12 @@ public class PasswordController {
             return ResponseEntity.badRequest()
                     .body("El token es inválido, expirado o la contraseña no cumple los requisitos.");
         }
+    }
+
+    // 🔐 Validar token sin necesidad de llenar el formulario
+    @GetMapping("/validar-token")
+    public ResponseEntity<ValidarTokenResponse> validarToken(@RequestParam String token) {
+        return ResponseEntity.ok(passwordService.validarToken(token));
     }
 
     // 🛡 Obtener IP real (por si usas proxy, nginx, etc.)
