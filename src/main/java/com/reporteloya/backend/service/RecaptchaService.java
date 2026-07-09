@@ -1,5 +1,7 @@
 package com.reporteloya.backend.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,7 @@ public class RecaptchaService {
     private final String secretKey;
     private final double scoreThreshold;
     private final HttpClient httpClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RecaptchaService(
             @Value("${recaptcha.secret.key}") String secretKey,
@@ -47,12 +50,13 @@ public class RecaptchaService {
                     request, HttpResponse.BodyHandlers.ofString()
             );
 
-            String responseBody = httpResponse.body();
-            if (responseBody == null || !responseBody.contains("\"success\": true")) {
+            JsonNode root = objectMapper.readTree(httpResponse.body());
+
+            if (!root.path("success").asBoolean(false)) {
                 throw new IllegalArgumentException("Verificación de seguridad fallida.");
             }
 
-            double score = extractScore(responseBody);
+            double score = root.path("score").asDouble(0.0);
             if (score < scoreThreshold) {
                 throw new IllegalArgumentException(
                         "No se pudo verificar que eres humano. Intenta de nuevo."
@@ -65,23 +69,6 @@ public class RecaptchaService {
             throw new IllegalArgumentException(
                     "Error al verificar la seguridad. Intenta de nuevo."
             );
-        }
-    }
-
-    private double extractScore(String json) {
-        String key = "\"score\":";
-        int idx = json.indexOf(key);
-        if (idx < 0) return 0.0;
-
-        int start = idx + key.length();
-        int end = json.indexOf(',', start);
-        if (end < 0) end = json.indexOf('}', start);
-        if (end < 0) return 0.0;
-
-        try {
-            return Double.parseDouble(json.substring(start, end).trim());
-        } catch (NumberFormatException e) {
-            return 0.0;
         }
     }
 }
