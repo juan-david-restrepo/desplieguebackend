@@ -2,6 +2,8 @@ package com.reporteloya.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 
 @Service
 public class RecaptchaService {
+
+    private static final Logger log = LoggerFactory.getLogger(RecaptchaService.class);
 
     private final String secretKey;
     private final double scoreThreshold;
@@ -51,13 +55,19 @@ public class RecaptchaService {
             );
 
             JsonNode root = objectMapper.readTree(httpResponse.body());
+            log.info("[reCAPTCHA] Google response: {}", httpResponse.body());
 
-            if (!root.path("success").asBoolean(false)) {
+            boolean success = root.path("success").asBoolean(false);
+            double score = root.path("score").asDouble(-1.0);
+            log.info("[reCAPTCHA] success={}, score={}, threshold={}", success, score, scoreThreshold);
+
+            if (!success) {
+                log.warn("[reCAPTCHA] Falló: error-codes={}", root.path("error-codes"));
                 throw new IllegalArgumentException("Verificación de seguridad fallida.");
             }
 
-            double score = root.path("score").asDouble(0.0);
             if (score < scoreThreshold) {
+                log.warn("[reCAPTCHA] Score {} por debajo del umbral {}", score, scoreThreshold);
                 throw new IllegalArgumentException(
                         "No se pudo verificar que eres humano. Intenta de nuevo."
                 );
@@ -66,6 +76,7 @@ public class RecaptchaService {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
+            log.error("[reCAPTCHA] Excepción inesperada verificando token", e);
             throw new IllegalArgumentException(
                     "Error al verificar la seguridad. Intenta de nuevo."
             );
