@@ -62,7 +62,19 @@ public class RecaptchaService {
             log.info("[reCAPTCHA] success={}, score={}, threshold={}", success, score, scoreThreshold);
 
             if (!success) {
-                log.warn("[reCAPTCHA] Falló: error-codes={}", root.path("error-codes"));
+                JsonNode errorCodes = root.path("error-codes");
+                log.warn("[reCAPTCHA] Falló: error-codes={}", errorCodes);
+
+                // browser-error: el navegador del usuario tiene restricciones de privacidad
+                // (bloqueadores, modo estricto, Brave, etc.). No es un bot — dejar pasar.
+                boolean soloBrowserError = errorCodes.isArray()
+                        && errorCodes.size() == 1
+                        && "browser-error".equals(errorCodes.get(0).asText());
+                if (soloBrowserError) {
+                    log.info("[reCAPTCHA] browser-error ignorado — usuario legítimo con browser restrictivo");
+                    return;
+                }
+
                 throw new IllegalArgumentException("Verificación de seguridad fallida.");
             }
 
